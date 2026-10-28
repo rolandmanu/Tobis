@@ -1,0 +1,51 @@
+{
+  "project": "TOBIS",
+  "line": "L1",
+  "city": "Tanger",
+  "demo": "first_osm_based_route_demo",
+  "source": {
+    "dataset": "OpenStreetMap",
+    "license": "ODbL",
+    "attribution": "© OpenStreetMap contributors",
+    "outbound_relation": {
+      "id": 6304295,
+      "url": "https://www.openstreetmap.org/relation/6304295"
+    },
+    "return_relation": {
+      "id": 7418371,
+      "url": "https://www.openstreetmap.org/relation/7418371"
+    },
+    "overpass_query": "[out:json][timeout:25];(rel(6304295); rel(7418371);); out geom; >; out skel qt;",
+    "notes": "This demo intentionally does not inject coordinates. The real stop coordinates and route geometry must be retrieved from the referenced OSM relations before integration."
+  },
+  "verification": {
+    "status": "pending_live_validation",
+    "checked": false,
+    "source_verified": false,
+    "required_before_integration": [
+      "Fetch the full OSM relation members from the live Overpass API for relation 6304295 and 7418371.",
+      "Extract all stop nodes and their exact latitude/longitude from the member list.",
+      "Extract the real route geometry (polyline) from the relation geometry output.",
+      "Validate every stop coordinate is present and not fabricated.",
+      "Confirm the outbound and return polylines match the actual OSM relation directions.",
+      "Reject the demo if any node, coordinate, or geometry is missing or inconsistent."
+    ]
+  },
+  "routes": {
+    "outbound": {
+      "relation_id": 6304295,
+      "name": "L1 Tanger outbound",
+      "geometry": null,
+      "source_url": "https://www.openstreetmap.org/relation/6304295",
+      "stops": []
+    },
+    "return": {
+      "relation_id": 7418371,
+      "name": "L1 Tanger return",
+      "geometry": null,
+      "source_url": "https://www.openstreetmap.org/relation/7418371",
+      "stops": []
+    }
+  },
+  "stops": []
+}
