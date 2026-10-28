@@ -7,17 +7,22 @@
     minTracePoints: 2,
     minRoutePoints: 2,
     maxDistanceMeters: 80,
-    requiredCoverageRatio: 0.6,
-    minConfidence: 0.55,
-    ambiguityGap: 0.08,
-    minDirectionConsistency: 0.5,
+    requiredCoverageRatio: 0.55,
+    minConfidence: 0.58,
+    ambiguityGap: 0.06,
+    minDirectionConsistency: 0.35,
     maxTimestampGapMinutes: 10,
     maxNearestDistanceMeters: 80,
-    minRouteLengthMeters: 40
+    minRouteLengthMeters: 60
   });
 
   function mergeThresholds(overrides) {
     return Object.assign({}, DEFAULT_THRESHOLDS, overrides || {});
+  }
+
+  function getThreshold(config, key, fallback) {
+    const value = config && Object.prototype.hasOwnProperty.call(config, key) ? config[key] : undefined;
+    return Number.isFinite(value) ? value : fallback;
   }
 
   function clamp(value, min, max) {
@@ -37,8 +42,17 @@
       return null;
     }
 
-    const lat = safeNumber(rawPoint.lat ?? rawPoint.latitude);
-    const lng = safeNumber(rawPoint.lng ?? rawPoint.lon ?? rawPoint.longitude);
+    let lat = null;
+    let lng = null;
+
+    if (Array.isArray(rawPoint) && rawPoint.length >= 2) {
+      lat = safeNumber(rawPoint[0]);
+      lng = safeNumber(rawPoint[1]);
+    } else {
+      lat = safeNumber(rawPoint.lat ?? rawPoint.latitude);
+      lng = safeNumber(rawPoint.lng ?? rawPoint.lon ?? rawPoint.longitude);
+    }
+
     if (lat === null || lng === null) {
       return null;
     }
@@ -47,60 +61,113 @@
       return null;
     }
 
-    const timestamp = rawPoint.timestamp || rawPoint.time || rawPoint.ts || null;
-    const timeMs = typeof timestamp === 'number' ? timestamp : Date.parse(timestamp);
+    const timestampSource = rawPoint.timestamp ?? rawPoint.time ?? rawPoint.ts ?? null;
+    let timestamp = null;
+    let hasValidTimestamp = false;
+
+    if (typeof timestampSource === 'number' && Number.isFinite(timestampSource)) {
+      const parsed = new Date(timestampSource);
+      if (!Number.isNaN(parsed.getTime())) {
+        timestamp = parsed.toISOString();
+        hasValidTimestamp = true;
+      }
+    } else if (typeof timestampSource === 'string') {
+      const parsed = Date.parse(timestampSource);
+      if (Number.isFinite(parsed)) {
+        timestamp = new Date(parsed).toISOString();
+        hasValidTimestamp = true;
+      }
+    }
 
     return {
       lat,
       lng,
-      timestamp: Number.isFinite(timeMs) ? new Date(timeMs).toISOString() : null
+      timestamp,
+      hasValidTimestamp
     };
   }
 
   function sanitizeTrace(trace, thresholds) {
+    const config = mergeThresholds(thresholds);
     if (!Array.isArray(trace) || trace.length === 0) {
-      return [];
+      return {
+        points: [],
+        diagnostics: {
+          status: 'insufficient_gps_data',
+          reason: 'empty_trace',
+          invalidGpsCount: 0,
+          invalidTimestampCount: 0,
+          validSamples: 0
+        }
+      };
     }
 
-    const validTrace = [];
-    const comp = thresholds || DEFAULT_THRESHOLDS;
-    const minPoints = Math.max(1, Number(comp.minTracePoints) || 1);
+    const validPoints = [];
+    const diagnostics = {
+      status: 'insufficient_gps_data',
+      reason: 'invalid_trace',
+      invalidGpsCount: 0,
+      invalidTimestampCount: 0,
+      validSamples: 0,
+      missingTimestampCount: 0
+    };
 
     let previousPoint = null;
-    for (const candidate of trace) {
-      const point = normalizePoint(candidate);
+    for (const sample of trace) {
+      const point = normalizePoint(sample);
       if (!point) {
+        diagnostics.invalidGpsCount += 1;
         continue;
       }
 
-      if (previousPoint) {
-        const gapMinutes = Math.abs(
-          (Date.parse(point.timestamp || new Date().toISOString()) - Date.parse(previousPoint.timestamp || new Date().toISOString())) /
-            60000
-        );
-        if (Number.isFinite(gapMinutes) && gapMinutes > (Number(comp.maxTimestampGapMinutes) || 10)) {
-          continue;
+      if (sample && sample.timestamp !== undefined && sample.timestamp !== null) {
+        const parsed = Date.parse(sample.timestamp);
+        if (!Number.isFinite(parsed)) {
+          diagnostics.invalidTimestampCount += 1;
+        }
+      } else {
+        diagnostics.missingTimestampCount += 1;
+      }
+
+      if (previousPoint && previousPoint.timestamp && point.timestamp) {
+        const previousMs = Date.parse(previousPoint.timestamp);
+        const currentMs = Date.parse(point.timestamp);
+        const gapMinutes = Math.abs((currentMs - previousMs) / 60000);
+        const maxGap = getThreshold(config, 'maxTimestampGapMinutes', DEFAULT_THRESHOLDS.maxTimestampGapMinutes);
+        if (Number.isFinite(gapMinutes) && gapMinutes > maxGap) {
+          diagnostics.reason = 'timestamp_gap_too_large';
         }
       }
 
+      validPoints.push({ lat: point.lat, lng: point.lng, timestamp: point.timestamp });
       previousPoint = point;
-      validTrace.push(point);
     }
 
-    if (validTrace.length < minPoints) {
-      return [];
+    diagnostics.validSamples = validPoints.length;
+
+    if (validPoints.length < getThreshold(config, 'minTracePoints', DEFAULT_THRESHOLDS.minTracePoints)) {
+      diagnostics.reason = 'insufficient_trace_points';
+      return { points: [], diagnostics };
     }
 
-    return validTrace;
+    diagnostics.status = 'ok';
+    diagnostics.reason = 'trace_valid';
+    return { points: validPoints, diagnostics };
   }
 
   function sanitizeRoute(route, thresholds) {
+    const config = mergeThresholds(thresholds);
     if (!route || typeof route !== 'object') {
       return null;
     }
 
-    const geometry = Array.isArray(route.geometry) ? route.geometry : Array.isArray(route.points) ? route.points : [];
-    if (!geometry || geometry.length < (Number(thresholds.minRoutePoints) || 2)) {
+    const geometry = Array.isArray(route.geometry)
+      ? route.geometry
+      : Array.isArray(route.points)
+        ? route.points
+        : [];
+
+    if (!geometry || geometry.length < getThreshold(config, 'minRoutePoints', DEFAULT_THRESHOLDS.minRoutePoints)) {
       return null;
     }
 
@@ -110,17 +177,16 @@
       if (!point) {
         continue;
       }
-      points.push(point);
+      points.push({ lat: point.lat, lng: point.lng, timestamp: point.timestamp || null });
     }
 
-    if (points.length < (Number(thresholds.minRoutePoints) || 2)) {
+    if (points.length < getThreshold(config, 'minRoutePoints', DEFAULT_THRESHOLDS.minRoutePoints)) {
       return null;
     }
 
-    const routeId = route.id || route.routeId || route.name || 'route';
     return {
-      id: routeId,
-      name: route.name || route.routeName || routeId,
+      id: route.id || route.routeId || route.name || 'route',
+      name: route.name || route.routeName || route.id || 'route',
       geometry: points,
       metadata: route.metadata || {}
     };
@@ -148,6 +214,7 @@
     const lat1 = degreesToRadians(a.lat);
     const lat2 = degreesToRadians(b.lat);
     const deltaLng = degreesToRadians(b.lng - a.lng);
+
     const y = Math.sin(deltaLng) * Math.cos(lat2);
     const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLng);
     const angle = Math.atan2(y, x);
@@ -155,8 +222,7 @@
   }
 
   function normalizeBearingDegrees(value) {
-    const normalized = ((value % 360) + 360) % 360;
-    return normalized;
+    return ((value % 360) + 360) % 360;
   }
 
   function smallAngleDifferenceDegrees(a, b) {
@@ -165,18 +231,31 @@
   }
 
   function pointToSegmentDistance(point, a, b) {
-    const ap = { lat: point.lat - a.lat, lng: point.lng - a.lng };
-    const ab = { lat: b.lat - a.lat, lng: b.lng - a.lng };
-    const ab2 = ab.lat * ab.lat + ab.lng * ab.lng;
-    if (ab2 === 0) {
-      return haversineMeters(point, a);
+    // Local tangent-plane projection: stable for short city-scale routes, but not a geodesic solution
+    // for long-range travel, near-poles, or routes spanning large geographic extents.
+    const earthRadiusMeters = 6371000;
+    const meanLat = (a.lat + b.lat) / 2;
+    const latScale = Math.cos(degreesToRadians(meanLat)) || 1;
+
+    const ax = earthRadiusMeters * degreesToRadians(a.lng - point.lng) * latScale;
+    const ay = earthRadiusMeters * degreesToRadians(a.lat - point.lat);
+    const bx = earthRadiusMeters * degreesToRadians(b.lng - point.lng) * latScale;
+    const by = earthRadiusMeters * degreesToRadians(b.lat - point.lat);
+
+    const segmentX = bx - ax;
+    const segmentY = by - ay;
+    const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+    if (segmentLengthSquared === 0) {
+      return Math.hypot(bx - ax, by - ay);
     }
 
-    const projection = (ap.lat * ab.lat + ap.lng * ab.lng) / ab2;
-    const clamped = clamp(projection, 0, 1);
-    const closestLat = a.lat + ab.lat * clamped;
-    const closestLng = a.lng + ab.lng * clamped;
-    return haversineMeters(point, { lat: closestLat, lng: closestLng });
+    const projection = ((0 - ax) * segmentX + (0 - ay) * segmentY) / segmentLengthSquared;
+    const t = clamp(projection, 0, 1);
+
+    const closestX = ax + segmentX * t;
+    const closestY = ay + segmentY * t;
+    return Math.hypot(0 - closestX, 0 - closestY);
   }
 
   function routeGeometryLengthMeters(geometry) {
@@ -192,17 +271,23 @@
   }
 
   function nearestDistanceToRoute(point, routeGeometry) {
+    if (!Array.isArray(routeGeometry) || routeGeometry.length < 2) {
+      return Number.POSITIVE_INFINITY;
+    }
+
     let minimumDistance = Number.POSITIVE_INFINITY;
     for (let index = 1; index < routeGeometry.length; index += 1) {
-      const segmentDistance = pointToSegmentDistance(point, routeGeometry[index - 1], routeGeometry[index]);
-      if (segmentDistance < minimumDistance) {
-        minimumDistance = segmentDistance;
+      const distance = pointToSegmentDistance(point, routeGeometry[index - 1], routeGeometry[index]);
+      if (distance < minimumDistance) {
+        minimumDistance = distance;
       }
     }
+
     return Number.isFinite(minimumDistance) ? minimumDistance : Number.POSITIVE_INFINITY;
   }
 
   function evaluateRouteCoverage(routeGeometry, trace, thresholds) {
+    const config = mergeThresholds(thresholds);
     if (!Array.isArray(routeGeometry) || routeGeometry.length < 2 || !Array.isArray(trace) || trace.length === 0) {
       return {
         coverageRatio: 0,
@@ -212,7 +297,7 @@
       };
     }
 
-    const maxDistance = Number(thresholds.maxDistanceMeters) || DEFAULT_THRESHOLDS.maxDistanceMeters;
+    const maxDistance = getThreshold(config, 'maxDistanceMeters', DEFAULT_THRESHOLDS.maxDistanceMeters);
     let withinThresholdCount = 0;
     let totalDistance = 0;
 
@@ -225,7 +310,7 @@
     }
 
     const coverageRatio = trace.length > 0 ? withinThresholdCount / trace.length : 0;
-    const averageDistanceMeters = trace.length > 0 ? totalDistance / trace.length : 0;
+    const averageDistanceMeters = trace.length > 0 ? totalDistance / trace.length : Number.POSITIVE_INFINITY;
     const distanceScore = 1 - clamp(averageDistanceMeters / maxDistance, 0, 1);
     const score = clamp((coverageRatio * 0.7) + (distanceScore * 0.3), 0, 1);
 
@@ -238,6 +323,7 @@
   }
 
   function evaluateDirection(routeGeometry, trace, thresholds) {
+    const config = mergeThresholds(thresholds);
     if (!Array.isArray(routeGeometry) || routeGeometry.length < 2 || !Array.isArray(trace) || trace.length < 2) {
       return {
         routeBearing: null,
@@ -257,43 +343,48 @@
     const routeBearing = normalizeBearingDegrees(bearingBetween(routeStart, routeEnd));
     const traceBearing = normalizeBearingDegrees(bearingBetween(traceStart, traceEnd));
     const headingDifference = smallAngleDifferenceDegrees(routeBearing, traceBearing);
-    const score = 1 - (headingDifference / 180);
+    const score = clamp(1 - (headingDifference / 180), 0, 1);
     const isReverse = headingDifference >= 150;
+    const minDirectionConsistency = getThreshold(
+      config,
+      'minDirectionConsistency',
+      DEFAULT_THRESHOLDS.minDirectionConsistency
+    );
 
     return {
       routeBearing,
       traceBearing,
       headingDifference,
-      score: clamp(score, 0, 1),
+      score,
       isReverse,
-      status: isReverse ? 'reverse_direction' : 'matching_direction'
+      status: isReverse || score < minDirectionConsistency ? 'reverse_direction_confirmation_required' : 'matching_direction'
     };
   }
 
   function scoreCandidate(route, trace, thresholds) {
-    if (!route || !Array.isArray(route.geometry) || route.geometry.length < (Number(thresholds.minRoutePoints) || 2)) {
+    const config = mergeThresholds(thresholds);
+    if (!route || !Array.isArray(route.geometry) || route.geometry.length < getThreshold(config, 'minRoutePoints', DEFAULT_THRESHOLDS.minRoutePoints)) {
       return null;
     }
 
-    const coverage = evaluateRouteCoverage(route.geometry, trace, thresholds);
-    if (coverage.coverageRatio < (Number(thresholds.requiredCoverageRatio) || DEFAULT_THRESHOLDS.requiredCoverageRatio)) {
+    const coverage = evaluateRouteCoverage(route.geometry, trace, config);
+    const minCoverage = getThreshold(config, 'requiredCoverageRatio', DEFAULT_THRESHOLDS.requiredCoverageRatio);
+    if (coverage.coverageRatio < minCoverage) {
       return null;
     }
 
-    const direction = evaluateDirection(route.geometry, trace, thresholds);
+    const direction = evaluateDirection(route.geometry, trace, config);
     const routeLengthMeters = routeGeometryLengthMeters(route.geometry);
-    const isValidGeometry = routeLengthMeters >= (Number(thresholds.minRouteLengthMeters) || DEFAULT_THRESHOLDS.minRouteLengthMeters);
-    if (!isValidGeometry) {
+    const minRouteLength = getThreshold(config, 'minRouteLengthMeters', DEFAULT_THRESHOLDS.minRouteLengthMeters);
+    if (routeLengthMeters < minRouteLength) {
       return null;
     }
 
-    const directionWeight = 0.25;
-    const coverageWeight = 0.65;
-    const consistencyWeight = 0.1;
-    const directionContribution = direction.score * directionWeight;
-    const coverageContribution = coverage.score * coverageWeight;
-    const routeLengthContribution = clamp(routeLengthMeters / (routeLengthMeters + 500), 0, 1) * consistencyWeight;
-    const confidence = clamp(coverageContribution + directionContribution + routeLengthContribution, 0, 1);
+    const confidence = clamp(
+      (coverage.score * 0.7) + (direction.score * 0.25) + ((routeLengthMeters / (routeLengthMeters + 500)) * 0.05),
+      0,
+      1
+    );
 
     return {
       routeId: route.id,
@@ -302,57 +393,99 @@
       direction,
       routeLengthMeters,
       confidence,
-      reason: direction.isReverse ? 'reverse_direction' : 'route_match'
+      reason: direction.isReverse ? 'reverse_direction_confirmation_required' : 'route_match',
+      requires_confirmation: Boolean(direction.isReverse)
     };
   }
 
   function detectRoute(trace, routeCatalog, options) {
-    const thresholds = mergeThresholds(options && options.thresholds ? options.thresholds : options);
-    const sanitizedTrace = sanitizeTrace(trace, thresholds);
-    if (!sanitizedTrace.length) {
-      return route_data_unavailable;
+    const config = mergeThresholds(options && options.thresholds ? options.thresholds : options);
+
+    const traceAnalysis = sanitizeTrace(trace, config);
+    if (traceAnalysis.points.length < getThreshold(config, 'minTracePoints', DEFAULT_THRESHOLDS.minTracePoints)) {
+      return {
+        status: 'insufficient_gps_data',
+        route_data: null,
+        diagnostics: traceAnalysis.diagnostics
+      };
     }
 
     const catalog = Array.isArray(routeCatalog) ? routeCatalog : [];
-    const candidates = [];
-
+    const validRoutes = [];
     for (const route of catalog) {
-      const sanitizedRoute = sanitizeRoute(route, thresholds);
-      if (!sanitizedRoute) {
-        continue;
+      const sanitized = sanitizeRoute(route, config);
+      if (sanitized) {
+        validRoutes.push(sanitized);
       }
+    }
 
-      const candidate = scoreCandidate(sanitizedRoute, sanitizedTrace, thresholds);
+    if (!validRoutes.length) {
+      return route_data_unavailable;
+    }
+
+    const candidates = [];
+    for (const route of validRoutes) {
+      const candidate = scoreCandidate(route, traceAnalysis.points, config);
       if (!candidate) {
         continue;
       }
-
-      if (candidate.confidence < (Number(thresholds.minConfidence) || DEFAULT_THRESHOLDS.minConfidence)) {
+      if (candidate.confidence < getThreshold(config, 'minConfidence', DEFAULT_THRESHOLDS.minConfidence)) {
         continue;
       }
-
       candidates.push(candidate);
     }
 
     if (!candidates.length) {
-      return route_data_unavailable;
+      return {
+        status: 'insufficient_confidence',
+        route_data: null,
+        diagnostics: {
+          reason: 'gps_too_far_from_all_routes_or_confidence_below_threshold',
+          traceSamples: traceAnalysis.points.length,
+          candidateCount: 0,
+          bestCoverage: 0
+        }
+      };
     }
 
     candidates.sort((a, b) => b.confidence - a.confidence);
     const topCandidate = candidates[0];
     const secondCandidate = candidates[1] || null;
     const gap = secondCandidate ? topCandidate.confidence - secondCandidate.confidence : 1;
-    const ambiguous = secondCandidate && gap <= (Number(thresholds.ambiguityGap) || DEFAULT_THRESHOLDS.ambiguityGap) &&
-      secondCandidate.confidence >= (Number(thresholds.minConfidence) || DEFAULT_THRESHOLDS.minConfidence);
+    const ambiguous =
+      secondCandidate &&
+      gap <= getThreshold(config, 'ambiguityGap', DEFAULT_THRESHOLDS.ambiguityGap) &&
+      secondCandidate.confidence >= getThreshold(config, 'minConfidence', DEFAULT_THRESHOLDS.minConfidence);
 
     if (ambiguous) {
       return {
-        status: 'ambiguous',
+        status: 'ambiguous_route',
         ambiguous: true,
         confidence: topCandidate.confidence,
         candidates: [topCandidate, secondCandidate],
         route_data: null,
-        reason: 'ambiguous_route_match'
+        reason: 'two_or_more_routes_overlap_or_run_parallel',
+        requires_confirmation: true
+      };
+    }
+
+    if (topCandidate.requires_confirmation || topCandidate.direction.isReverse) {
+      return {
+        status: 'reverse_direction_confirmation_required',
+        ambiguous: false,
+        confidence: topCandidate.confidence,
+        routeId: topCandidate.routeId,
+        routeName: topCandidate.routeName,
+        route_data: {
+          routeId: topCandidate.routeId,
+          routeName: topCandidate.routeName,
+          confidence: topCandidate.confidence,
+          coverage: topCandidate.coverage,
+          direction: topCandidate.direction,
+          routeLengthMeters: topCandidate.routeLengthMeters
+        },
+        reason: 'route_matches_in_reverse_direction',
+        requires_confirmation: true
       };
     }
 
