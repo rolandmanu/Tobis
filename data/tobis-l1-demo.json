@@ -16,36 +16,95 @@
       "url": "https://www.openstreetmap.org/relation/7418371"
     },
     "overpass_query": "[out:json][timeout:25];(rel(6304295); rel(7418371);); out geom; >; out skel qt;",
-    "notes": "This demo intentionally does not inject coordinates. The real stop coordinates and route geometry must be retrieved from the referenced OSM relations before integration."
+    "notes": "This file stores only data that has actually been retrieved from OpenStreetMap. Missing values are left empty; no coordinates or geometry are invented."
+  },
+  "retrieval": {
+    "retrieved_at": "2026-10-28T20:44:28Z",
+    "status": "blocked",
+    "source_access": "OpenStreetMap / Overpass API access unavailable in this execution environment",
+    "errors": [
+      {
+        "relation_id": 6304295,
+        "status": "not_retrieved",
+        "error": "Live OSM/Overpass data could not be queried from the available tooling. The environment does not expose a networked OSM fetch path, so no relation members, node coordinates, or geometry were retrieved."
+      },
+      {
+        "relation_id": 7418371,
+        "status": "not_retrieved",
+        "error": "Live OSM/Overpass data could not be queried from the available tooling. The environment does not expose a networked OSM fetch path, so no relation members, node coordinates, or geometry were retrieved."
+      }
+    ]
   },
   "verification": {
-    "status": "pending_live_validation",
+    "status": "blocked",
     "checked": false,
     "source_verified": false,
+    "operationally_verified": false,
+    "incomplete_checks": [
+      "Retrieve the real OSM relation members for outbound relation 6304295.",
+      "Retrieve the real OSM relation members for return relation 7418371.",
+      "Extract all stop node IDs and names from those relations.",
+      "Extract exact stop coordinates (latitude/longitude) when present.",
+      "Extract the actual route geometry from the relation members without approximation.",
+      "Check whether any stop coordinate is missing or ambiguous.",
+      "Check for inconsistencies between outbound and return directions.",
+      "Independently verify the route against the actual bus service operations before marking it operationally valid."
+    ],
     "required_before_integration": [
       "Fetch the full OSM relation members from the live Overpass API for relation 6304295 and 7418371.",
       "Extract all stop nodes and their exact latitude/longitude from the member list.",
       "Extract the real route geometry (polyline) from the relation geometry output.",
       "Validate every stop coordinate is present and not fabricated.",
-      "Confirm the outbound and return polylines match the actual OSM relation directions.",
-      "Reject the demo if any node, coordinate, or geometry is missing or inconsistent."
+      "Confirm the outbound and return polylines correspond to the actual OSM relation directions.",
+      "Reject the demo if any node, coordinate, or geometry is missing or inconsistent.",
+      "Perform a separate operational verification against the actual service before marking the route as operationally verified."
     ]
   },
   "routes": {
     "outbound": {
       "relation_id": 6304295,
       "name": "L1 Tanger outbound",
-      "geometry": null,
+      "retrieval_status": "not_retrieved",
       "source_url": "https://www.openstreetmap.org/relation/6304295",
-      "stops": []
+      "geometry": [],
+      "geometry_points_count": 0,
+      "stops": [],
+      "stops_count": 0,
+      "issues": [
+        "No live OSM member data was retrieved.",
+        "No stop coordinates were retrieved.",
+        "No route geometry was retrieved."
+      ],
+      "notes": "Outbound route data remains empty until the relation is fetched successfully from OpenStreetMap/Overpass."
     },
     "return": {
       "relation_id": 7418371,
       "name": "L1 Tanger return",
-      "geometry": null,
+      "retrieval_status": "not_retrieved",
       "source_url": "https://www.openstreetmap.org/relation/7418371",
-      "stops": []
+      "geometry": [],
+      "geometry_points_count": 0,
+      "stops": [],
+      "stops_count": 0,
+      "issues": [
+        "No live OSM member data was retrieved.",
+        "No stop coordinates were retrieved.",
+        "No route geometry was retrieved."
+      ],
+      "notes": "Return route data remains empty until the relation is fetched successfully from OpenStreetMap/Overpass."
     }
   },
-  "stops": []
+  "stops": [],
+  "summary": {
+    "outbound": {
+      "stops_retrieved": 0,
+      "geometry_points_retrieved": 0,
+      "status": "not_retrieved"
+    },
+    "return": {
+      "stops_retrieved": 0,
+      "geometry_points_retrieved": 0,
+      "status": "not_retrieved"
+    }
+  }
 }
