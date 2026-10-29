@@ -1,7 +1,13 @@
 (function (globalScope) {
   'use strict';
 
-  const route_data_unavailable = 'route_data_unavailable';
+  const route_data_unavailable = {
+    status: 'route_data_unavailable',
+    route_data: null,
+    diagnostics: {
+      reason: 'no_valid_routes_in_catalog'
+    }
+  };
 
   const DEFAULT_THRESHOLDS = Object.freeze({
     minTracePoints: 2,
@@ -33,12 +39,24 @@
   }
 
   function safeNumber(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    if (typeof value === 'string' && value.trim() === '') {
+      return null;
+    }
+
     const numeric = Number(value);
     return Number.isFinite(numeric) ? numeric : null;
   }
 
   function normalizePoint(rawPoint) {
-    if (!rawPoint || typeof rawPoint !== 'object') {
+    if (rawPoint === null || rawPoint === undefined || rawPoint === '') {
+      return null;
+    }
+
+    if (typeof rawPoint !== 'object') {
       return null;
     }
 
@@ -109,7 +127,8 @@
       invalidGpsCount: 0,
       invalidTimestampCount: 0,
       validSamples: 0,
-      missingTimestampCount: 0
+      missingTimestampCount: 0,
+      maxTimestampGapMinutes: getThreshold(config, 'maxTimestampGapMinutes', DEFAULT_THRESHOLDS.maxTimestampGapMinutes)
     };
 
     let previousPoint = null;
@@ -120,10 +139,13 @@
         continue;
       }
 
-      if (sample && sample.timestamp !== undefined && sample.timestamp !== null) {
+      if (sample && sample.timestamp !== undefined && sample.timestamp !== null && sample.timestamp !== '') {
         const parsed = Date.parse(sample.timestamp);
         if (!Number.isFinite(parsed)) {
           diagnostics.invalidTimestampCount += 1;
+          diagnostics.status = 'invalid_trace';
+          diagnostics.reason = 'invalid_timestamp';
+          return { points: [], diagnostics };
         }
       } else {
         diagnostics.missingTimestampCount += 1;
@@ -135,7 +157,11 @@
         const gapMinutes = Math.abs((currentMs - previousMs) / 60000);
         const maxGap = getThreshold(config, 'maxTimestampGapMinutes', DEFAULT_THRESHOLDS.maxTimestampGapMinutes);
         if (Number.isFinite(gapMinutes) && gapMinutes > maxGap) {
+          diagnostics.status = 'invalid_trace';
           diagnostics.reason = 'timestamp_gap_too_large';
+          diagnostics.maxTimestampGapMinutes = maxGap;
+          diagnostics.gapMinutes = gapMinutes;
+          return { points: [], diagnostics };
         }
       }
 
@@ -231,8 +257,6 @@
   }
 
   function pointToSegmentDistance(point, a, b) {
-    // Local tangent-plane projection: stable for short city-scale routes, but not a geodesic solution
-    // for long-range travel, near-poles, or routes spanning large geographic extents.
     const earthRadiusMeters = 6371000;
     const meanLat = (a.lat + b.lat) / 2;
     const latScale = Math.cos(degreesToRadians(meanLat)) || 1;
@@ -256,6 +280,24 @@
     const closestX = ax + segmentX * t;
     const closestY = ay + segmentY * t;
     return Math.hypot(0 - closestX, 0 - closestY);
+  }
+
+  function nearestRouteSegmentForPoint(point, routeGeometry) {
+    if (!Array.isArray(routeGeometry) || routeGeometry.length < 2) {
+      return { index: -1, a: null, b: null, distance: Number.POSITIVE_INFINITY };
+    }
+
+    let best = { index: -1, a: null, b: null, distance: Number.POSITIVE_INFINITY };
+    for (let index = 0; index < routeGeometry.length - 1; index += 1) {
+      const a = routeGeometry[index];
+      const b = routeGeometry[index + 1];
+      const distance = pointToSegmentDistance(point, a, b);
+      if (distance < best.distance) {
+        best = { index, a, b, distance };
+      }
+    }
+
+    return best;
   }
 
   function routeGeometryLengthMeters(geometry) {
@@ -331,25 +373,79 @@
         headingDifference: 180,
         score: 0,
         isReverse: false,
-        status: 'insufficient_geometry'
+        status: 'direction_confirmation_required',
+        reason: 'insufficient_geometry'
       };
     }
 
-    const routeStart = routeGeometry[0];
-    const routeEnd = routeGeometry[routeGeometry.length - 1];
-    const traceStart = trace[0];
-    const traceEnd = trace[trace.length - 1];
-
-    const routeBearing = normalizeBearingDegrees(bearingBetween(routeStart, routeEnd));
-    const traceBearing = normalizeBearingDegrees(bearingBetween(traceStart, traceEnd));
-    const headingDifference = smallAngleDifferenceDegrees(routeBearing, traceBearing);
-    const score = clamp(1 - (headingDifference / 180), 0, 1);
-    const isReverse = headingDifference >= 150;
+    const maxDistance = getThreshold(config, 'maxDistanceMeters', DEFAULT_THRESHOLDS.maxDistanceMeters);
     const minDirectionConsistency = getThreshold(
       config,
       'minDirectionConsistency',
       DEFAULT_THRESHOLDS.minDirectionConsistency
     );
+    const localDirections = [];
+
+    for (let index = 0; index < trace.length - 1; index += 1) {
+      const start = trace[index];
+      const end = trace[index + 1];
+      const midpoint = {
+        lat: (start.lat + end.lat) / 2,
+        lng: (start.lng + end.lng) / 2
+      };
+
+      const nearest = nearestRouteSegmentForPoint(midpoint, routeGeometry);
+      if (!nearest.a || !nearest.b || nearest.distance > maxDistance) {
+        continue;
+      }
+
+      const routeBearing = normalizeBearingDegrees(bearingBetween(nearest.a, nearest.b));
+      const traceBearing = normalizeBearingDegrees(bearingBetween(start, end));
+      const headingDifference = smallAngleDifferenceDegrees(routeBearing, traceBearing);
+
+      localDirections.push({
+        routeBearing,
+        traceBearing,
+        headingDifference,
+        distance: nearest.distance
+      });
+    }
+
+    if (localDirections.length === 0) {
+      const routeStart = routeGeometry[0];
+      const routeEnd = routeGeometry[routeGeometry.length - 1];
+      const traceStart = trace[0];
+      const traceEnd = trace[trace.length - 1];
+      const routeBearing = normalizeBearingDegrees(bearingBetween(routeStart, routeEnd));
+      const traceBearing = normalizeBearingDegrees(bearingBetween(traceStart, traceEnd));
+      const headingDifference = smallAngleDifferenceDegrees(routeBearing, traceBearing);
+      const score = clamp(1 - (headingDifference / 180), 0, 1);
+      const isReverse = headingDifference >= 150;
+
+      return {
+        routeBearing,
+        traceBearing,
+        headingDifference,
+        score,
+        isReverse,
+        status: 'direction_confirmation_required',
+        reason: 'local_direction_unreliable'
+      };
+    }
+
+    const routeBearing = normalizeBearingDegrees(
+      localDirections.reduce((total, item) => total + item.routeBearing, 0) / localDirections.length
+    );
+    const traceBearing = normalizeBearingDegrees(
+      localDirections.reduce((total, item) => total + item.traceBearing, 0) / localDirections.length
+    );
+    const headingDifference = smallAngleDifferenceDegrees(routeBearing, traceBearing);
+    const score = clamp(1 - (headingDifference / 180), 0, 1);
+    const isReverse = headingDifference >= 150;
+    const status =
+      localDirections.length >= 2 && score >= minDirectionConsistency && !isReverse
+        ? 'matching_direction'
+        : 'direction_confirmation_required';
 
     return {
       routeBearing,
@@ -357,7 +453,8 @@
       headingDifference,
       score,
       isReverse,
-      status: isReverse || score < minDirectionConsistency ? 'reverse_direction_confirmation_required' : 'matching_direction'
+      status,
+      reason: status === 'matching_direction' ? 'local_direction_matches' : 'local_direction_unreliable'
     };
   }
 
@@ -385,6 +482,7 @@
       0,
       1
     );
+    const confirmationRequired = Boolean(direction.status === 'direction_confirmation_required' || direction.isReverse);
 
     return {
       routeId: route.id,
@@ -393,8 +491,8 @@
       direction,
       routeLengthMeters,
       confidence,
-      reason: direction.isReverse ? 'reverse_direction_confirmation_required' : 'route_match',
-      requires_confirmation: Boolean(direction.isReverse)
+      reason: confirmationRequired ? 'direction_confirmation_required' : 'route_match',
+      requires_confirmation: confirmationRequired
     };
   }
 
@@ -465,13 +563,18 @@
         candidates: [topCandidate, secondCandidate],
         route_data: null,
         reason: 'two_or_more_routes_overlap_or_run_parallel',
-        requires_confirmation: true
+        requires_confirmation: true,
+        diagnostics: {
+          reason: 'two_or_more_routes_overlap_or_run_parallel',
+          candidateCount: candidates.length,
+          traceSamples: traceAnalysis.points.length
+        }
       };
     }
 
-    if (topCandidate.requires_confirmation || topCandidate.direction.isReverse) {
+    if (topCandidate.requires_confirmation) {
       return {
-        status: 'reverse_direction_confirmation_required',
+        status: 'direction_confirmation_required',
         ambiguous: false,
         confidence: topCandidate.confidence,
         routeId: topCandidate.routeId,
@@ -484,8 +587,13 @@
           direction: topCandidate.direction,
           routeLengthMeters: topCandidate.routeLengthMeters
         },
-        reason: 'route_matches_in_reverse_direction',
-        requires_confirmation: true
+        reason: 'route_direction_unreliable_or_reverse',
+        requires_confirmation: true,
+        diagnostics: {
+          reason: topCandidate.direction.reason || 'route_direction_unreliable_or_reverse',
+          traceSamples: traceAnalysis.points.length,
+          confidence: topCandidate.confidence
+        }
       };
     }
 
@@ -498,7 +606,12 @@
       route_data: topCandidate,
       reason: topCandidate.reason,
       coverage: topCandidate.coverage,
-      direction: topCandidate.direction
+      direction: topCandidate.direction,
+      diagnostics: {
+        reason: 'route_match',
+        traceSamples: traceAnalysis.points.length,
+        confidence: topCandidate.confidence
+      }
     };
   }
 
@@ -507,6 +620,7 @@
     DEFAULT_THRESHOLDS,
     mergeThresholds,
     normalizePoint,
+    safeNumber,
     sanitizeTrace,
     sanitizeRoute,
     distanceToSegment: pointToSegmentDistance,
