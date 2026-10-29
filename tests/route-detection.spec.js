@@ -145,6 +145,116 @@ test('accepts valid traces using ts alias', () => {
   assert.equal(result.points.length, 2);
 });
 
+test('valid timestamp takes precedence over valid time and ts', () => {
+  const trace = [
+    {
+      lat: 0,
+      lng: 0,
+      timestamp: '2024-01-01T08:00:00Z',
+      time: '2024-01-01T09:00:00Z',
+      ts: '2024-01-01T10:00:00Z'
+    },
+    {
+      lat: 0.0001,
+      lng: 0.0001,
+      timestamp: '2024-01-01T08:02:00Z',
+      time: '2024-01-01T09:02:00Z',
+      ts: '2024-01-01T10:02:00Z'
+    }
+  ];
+
+  const result = sanitizeTrace(trace, {});
+
+  assert.equal(result.diagnostics.status, 'ok');
+  assert.equal(result.points[0].timestamp, '2024-01-01T08:00:00.000Z');
+  assert.equal(result.points[1].timestamp, '2024-01-01T08:02:00.000Z');
+});
+
+test('invalid non-empty timestamp is rejected even when time is valid', () => {
+  const trace = [
+    {
+      lat: 0,
+      lng: 0,
+      timestamp: 'not-a-date',
+      time: '2024-01-01T08:00:00Z'
+    },
+    {
+      lat: 0.0001,
+      lng: 0.0001,
+      timestamp: '2024-01-01T08:02:00Z',
+      time: '2024-01-01T08:02:00Z'
+    }
+  ];
+
+  const result = sanitizeTrace(trace, {});
+
+  assert.equal(result.points.length, 0);
+  assert.equal(result.diagnostics.status, 'invalid_trace');
+  assert.equal(result.diagnostics.reason, 'invalid_timestamp');
+});
+
+test('empty timestamp falls back to time', () => {
+  const trace = [
+    {
+      lat: 0,
+      lng: 0,
+      timestamp: '',
+      time: '2024-01-01T08:00:00Z',
+      ts: '2024-01-01T10:00:00Z'
+    },
+    {
+      lat: 0.0001,
+      lng: 0.0001,
+      timestamp: '',
+      time: '2024-01-01T08:02:00Z',
+      ts: '2024-01-01T10:02:00Z'
+    }
+  ];
+
+  const result = sanitizeTrace(trace, {});
+
+  assert.equal(result.diagnostics.status, 'ok');
+  assert.equal(result.points[0].timestamp, '2024-01-01T08:00:00.000Z');
+});
+
+test('empty time falls back to ts', () => {
+  const trace = [
+    {
+      lat: 0,
+      lng: 0,
+      time: '',
+      ts: '2024-01-01T08:00:00Z'
+    },
+    {
+      lat: 0.0001,
+      lng: 0.0001,
+      time: '',
+      ts: '2024-01-01T08:02:00Z'
+    }
+  ];
+
+  const result = sanitizeTrace(trace, {});
+
+  assert.equal(result.diagnostics.status, 'ok');
+  assert.equal(result.points[0].timestamp, '2024-01-01T08:00:00.000Z');
+});
+
+test('accepts numeric millisecond timestamps and normalizes them', () => {
+  const firstMs = Date.UTC(2024, 0, 1, 8, 0, 0);
+  const secondMs = Date.UTC(2024, 0, 1, 8, 2, 0);
+
+  const trace = [
+    { lat: 0, lng: 0, timestamp: firstMs },
+    { lat: 0.0001, lng: 0.0001, timestamp: secondMs }
+  ];
+
+  const result = sanitizeTrace(trace, {});
+
+  assert.equal(result.diagnostics.status, 'ok');
+  assert.equal(result.points[0].timestamp, new Date(firstMs).toISOString());
+  assert.equal(result.points[1].timestamp, new Date(secondMs).toISOString());
+});
+
 test('detects routes that follow a curved geometry', () => {
   const route = {
     id: 'curved-route',
