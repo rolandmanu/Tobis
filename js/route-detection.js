@@ -51,6 +51,48 @@
     return Number.isFinite(numeric) ? numeric : null;
   }
 
+  function parseTimestampValue(value) {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Date.parse(value);
+      return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+    }
+
+    return null;
+  }
+
+  function resolveTimestamp(sample) {
+    if (!sample || typeof sample !== 'object') {
+      return { state: 'missing', value: null };
+    }
+
+    const keys = ['timestamp', 'time', 'ts'];
+    const presentValues = keys
+      .filter((key) => Object.prototype.hasOwnProperty.call(sample, key))
+      .map((key) => ({ key, value: sample[key] }))
+      .filter(({ value }) => value !== null && value !== undefined && value !== '');
+
+    if (presentValues.length === 0) {
+      return { state: 'missing', value: null };
+    }
+
+    const chosen = presentValues[0];
+    const parsed = parseTimestampValue(chosen.value);
+    if (parsed === null) {
+      return { state: 'invalid', value: null, key: chosen.key };
+    }
+
+    return { state: 'valid', value: parsed, key: chosen.key };
+  }
+
   function normalizePoint(rawPoint) {
     if (rawPoint === null || rawPoint === undefined || rawPoint === '') {
       return null;
@@ -79,29 +121,14 @@
       return null;
     }
 
-    const timestampSource = rawPoint.timestamp ?? rawPoint.time ?? rawPoint.ts ?? null;
-    let timestamp = null;
-    let hasValidTimestamp = false;
-
-    if (typeof timestampSource === 'number' && Number.isFinite(timestampSource)) {
-      const parsed = new Date(timestampSource);
-      if (!Number.isNaN(parsed.getTime())) {
-        timestamp = parsed.toISOString();
-        hasValidTimestamp = true;
-      }
-    } else if (typeof timestampSource === 'string') {
-      const parsed = Date.parse(timestampSource);
-      if (Number.isFinite(parsed)) {
-        timestamp = new Date(parsed).toISOString();
-        hasValidTimestamp = true;
-      }
-    }
+    const timestampResolution = resolveTimestamp(rawPoint);
+    const timestamp = timestampResolution.state === 'valid' ? timestampResolution.value : null;
 
     return {
       lat,
       lng,
       timestamp,
-      hasValidTimestamp
+      hasValidTimestamp: timestampResolution.state === 'valid'
     };
   }
 
@@ -139,22 +166,33 @@
         continue;
       }
 
-      if (sample && sample.timestamp !== undefined && sample.timestamp !== null && sample.timestamp !== '') {
-        const parsed = Date.parse(sample.timestamp);
-        if (!Number.isFinite(parsed)) {
-          diagnostics.invalidTimestampCount += 1;
-          diagnostics.status = 'invalid_trace';
-          diagnostics.reason = 'invalid_timestamp';
-          return { points: [], diagnostics };
-        }
-      } else {
+      const timestampResolution = resolveTimestamp(sample);
+      if (timestampResolution.state === 'missing') {
         diagnostics.missingTimestampCount += 1;
+        diagnostics.status = 'invalid_trace';
+        diagnostics.reason = 'missing_timestamp';
+        return { points: [], diagnostics };
       }
 
-      if (previousPoint && previousPoint.timestamp && point.timestamp) {
+      if (timestampResolution.state === 'invalid') {
+        diagnostics.invalidTimestampCount += 1;
+        diagnostics.status = 'invalid_trace';
+        diagnostics.reason = 'invalid_timestamp';
+        return { points: [], diagnostics };
+      }
+
+      if (previousPoint && previousPoint.timestamp) {
         const previousMs = Date.parse(previousPoint.timestamp);
-        const currentMs = Date.parse(point.timestamp);
-        const gapMinutes = Math.abs((currentMs - previousMs) / 60000);
+        const currentMs = Date.parse(timestampResolution.value);
+        if (currentMs < previousMs) {
+          diagnostics.status = 'invalid_trace';
+          diagnostics.reason = 'timestamp_out_of_order';
+          diagnostics.previousTimestamp = previousPoint.timestamp;
+          diagnostics.currentTimestamp = timestampResolution.value;
+          return { points: [], diagnostics };
+        }
+
+        const gapMinutes = (currentMs - previousMs) / 60000;
         const maxGap = getThreshold(config, 'maxTimestampGapMinutes', DEFAULT_THRESHOLDS.maxTimestampGapMinutes);
         if (Number.isFinite(gapMinutes) && gapMinutes > maxGap) {
           diagnostics.status = 'invalid_trace';
@@ -165,8 +203,8 @@
         }
       }
 
-      validPoints.push({ lat: point.lat, lng: point.lng, timestamp: point.timestamp });
-      previousPoint = point;
+      validPoints.push({ lat: point.lat, lng: point.lng, timestamp: timestampResolution.value });
+      previousPoint = { lat: point.lat, lng: point.lng, timestamp: timestampResolution.value };
     }
 
     diagnostics.validSamples = validPoints.length;
