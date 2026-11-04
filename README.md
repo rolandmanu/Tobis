@@ -1,41 +1,83 @@
-# TOBIS PWA + Firebase — installation et mise en service
+# TOBIS — notification WhatsApp anonyme
 
-Cette version est une base PWA fonctionnelle : navigation, installation, cache de l’interface, connexion chauffeur Firebase Authentication, publication GPS et lecture en direct des trajets avec Cloud Firestore. Elle ne contient pas les horaires, arrêts ni positions réelles d’un opérateur. Tant que le projet Firebase et les comptes de chauffeur ne sont pas configurés, elle reste en mode démonstration.
+Cette version est pensée pour un usage anonyme : le passager donne simplement son numéro WhatsApp et la ligne souhaitée. Le chauffeur partage sa position GPS, et le backend (Firebase + Cloud Functions + WhatsApp Business) envoie des alertes toutes les 2 minutes ou plus souvent à l’approche.
 
-## 1. Créer/configurer Firebase
+## Ce que l’application fait dans le navigateur
 
-1. Créez un projet dans Firebase Console et ajoutez une application Web.
-2. Activez **Authentication → Sign-in method → Email/Password**.
-3. Créez **Cloud Firestore** en mode production.
-4. Copiez les paramètres de l’application Web dans `firebase-config.js` en remplaçant toutes les valeurs `REPLACE_...`. Ces paramètres web ne sont pas des clés secrètes.
-5. Installez Firebase CLI, connectez-vous (`firebase login`), puis associez le projet (`firebase use --add`).
-6. Déployez les règles fournies : `firebase deploy --only firestore:rules`.
-7. Créez les comptes chauffeurs dans Firebase Authentication. Pour chacun, créez dans Firestore un document `users/{UID}` (UID de l’authentification) avec le champ `{ "role": "driver" }`. Ne donnez jamais aux utilisateurs le droit de modifier leur propre rôle.
-8. Ajoutez les documents de lignes dans `routes/` depuis un outil d’administration fiable. Aucun client ne peut les écrire avec les règles incluses.
+- permet d’ouvrir une PWA installable
+- affiche les trajets actifs déjà publiés dans Firebase
+- permet au chauffeur de démarrer un trajet avec GPS
+- publie la localisation du chauffeur dans Firestore si Firebase est configuré
+- permet au passager de s’inscrire via un numéro WhatsApp (sans compte email)
 
-## 2. Déployer l’application
+## Ce que le navigateur ne peut pas faire seul
 
-Dans la racine du dépôt, après avoir sélectionné le bon projet Firebase :
+Le frontend ne peut pas envoyer de messages WhatsApp automatiquement :
+
+- WhatsApp Business nécessite un backend officiel
+- les jetons et secrets du fournisseur ne doivent pas être exposés dans le navigateur
+- les messages automatiques exigent les règles, les consentements et la conformité de Meta
+
+Le navigateur peut uniquement déclencher la publication de coordonnées et enregistrer la demande d’abonnement.
+
+## Architecture recommandée
+
+1. Chauffeur : publie sa position GPS dans Firestore (`liveTrips/{id}`)
+2. Backend Cloud Functions : surveille les trajets actifs; calcule ETA et approche d’arrêt
+3. WhatsApp Business API : envoie des messages au passager toutes les 2 minutes,
+   ou plus souvent quand le bus approche
+4. Firebase Firestore : conserve les abonnements passagers et les positions actives
+
+## Firebase base
+
+1. Créez un projet Firebase
+2. Activez Firestore
+3. Remplacez les valeurs de `firebase-config.js`
+4. Déployez la configuration hosting et les règles :
 
 ```sh
 firebase deploy --only hosting,firestore:rules
 ```
 
-La géolocalisation nécessite HTTPS (Firebase Hosting le fournit). La PWA peut être installée depuis un navigateur compatible après un premier chargement en ligne.
+## Modèle d’abonnement passager
 
-## Données de trajet
+Un abonnement minimal ressemble à :
 
-Chaque trajet publié est un document `liveTrips/{id}` contenant `driverUid`, `city`, `line`, `status`, `location`, `startedAt` et `updatedAt`. La position est remplacée à chaque mise à jour GPS; l’historique détaillé n’est pas conservé. Les trajets terminés ont `status: ended` et ne sont plus visibles dans la liste publique.
+```json
+{
+  "phone": "+212612345678",
+  "line": "Ligne A",
+  "stop": "Avenue Mohammed V",
+  "status": "active",
+  "createdAt": "2026-11-04T10:00:00Z"
+}
+```
 
-## Limites et sécurité à traiter avant une exploitation réelle
+## Backend WhatsApp (obligatoire)
 
-- Les chauffeurs publient uniquement quand la page reste ouverte. Les navigateurs mobiles suspendent souvent le GPS en arrière-plan; cette PWA ne garantit pas un suivi permanent.
-- Les règles protègent l’accès en écriture mais laissent lire les trajets actifs publiés. Décidez si la position précise peut être publique ou si une authentification/autorisation passager est requise.
-- Ajoutez une politique de confidentialité, le consentement, des délais de conservation et un processus de suppression, conformément aux exigences locales.
-- Le cache PWA ne met pas en cache les SDK Firebase distants ni les données Firestore du serveur. Firestore utilise son cache local pour les données déjà lues; l’envoi GPS exige le réseau.
-- Restrignez les API keys par domaine et configurez les quotas/alertes de facturation. Une Firebase API key côté web ne remplace jamais les règles de sécurité.
-- Publiez seulement les lignes et horaires confirmés par l’opérateur. Le projet ne fournit pas de vrais horaires ni un fond cartographique.
+L’API WhatsApp Business doit tourner côté serveur. Exemple de logique :
 
-## Vérification
+- chaque 2 minutes : envoyer un message si le trajet est actif
+- si ETA < 3 minutes : augmenter la fréquence ou envoyer un message plus urgent
+- si trajet terminé : arrêter les messages
 
-Ouvrez le site sur HTTPS, vérifiez l’onglet Application/Service Workers, testez la liste vide, puis connectez un compte chauffeur autorisé et démarrez un trajet. Contrôlez côté console Firebase qu’un document `liveTrips` apparaît et que sa position évolue. Testez également le refus GPS et l’absence de réseau avant tout pilote.
+Le backend calcule la distance totale et l’ETA à partir des arrêts connus et des positions GPS.
+
+## Limites importantes
+
+- une PWA en navigateur ne peut pas fonctionner en arrière-plan fiable sur tous les téléphones
+- le chauffeur doit rester connecté à Internet pour mettre à jour sa position
+- le passager doit avoir un accès à WhatsApp pour recevoir les notifications
+- les règles et le consentement WhatsApp doivent être vérifiés avant mise en service
+- le message individuel ou en masse peut être limité selon le plan de l’opérateur et les règles Meta
+
+## Vérification rapide
+
+1. Connectez Firebase et remplissez le fichier `firebase-config.js`
+2. Lancez le site en HTTPS
+3. Démarrez un trajet de démonstration
+4. Configurez un abonnement passager avec un numéro de test
+5. Vérifiez l’écriture dans Firestore
+6. Le backend WhatsApp Business doit alors envoyer les messages automatiques selon la logique ETA
+
+La version de cette interface n’envoie pas directement des messages WhatsApp ; elle prépare la collecte des positions et les abonnements nécessaires au backend Cloud Functions.

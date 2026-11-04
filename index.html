@@ -4,63 +4,105 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#075ba8">
-  <meta name="description" content="TOBIS — application expérimentale de transport urbain au Maroc">
+  <meta name="description" content="TOBIS — notifications WhatsApp sans inscription pour bus et lignes urbaines">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/tobis.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
-  <title>TOBIS — Transport urbain</title>
+  <title>TOBIS — Bus & WhatsApp</title>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#home" aria-label="TOBIS accueil"><span class="brand-mark">T</span><span>TOBIS<small>Transport urbain</small></span></a>
-    <div class="top-actions"><span id="connectionStatus" class="status" role="status">Initialisation…</span><button id="installButton" class="button secondary hidden" type="button">Installer</button><button id="signOutButton" class="button secondary hidden" type="button">Déconnexion</button></div>
+    <a class="brand" href="#home" aria-label="TOBIS accueil"><span class="brand-mark">T</span><span>TOBIS<small>Minuterie & alertes</small></span></a>
+    <div class="top-actions"><span id="connectionStatus" class="status" role="status">Initialisation…</span><button id="installButton" class="button secondary hidden" type="button">Installer</button></div>
   </header>
+
   <main class="container">
     <section class="hero" id="home">
-      <p class="eyebrow">Mobilité au Maroc</p><h1>Vos trajets, plus simples.</h1>
-      <p class="lead">Consultez les trajets publiés en direct ou connectez-vous comme chauffeur pour partager votre position pendant une course.</p>
-      <p class="notice" id="setupNotice" role="status">L’application démarre en mode démonstration. Configurez Firebase pour activer les données partagées.</p>
+      <p class="eyebrow">Transport urbain sans compte</p>
+      <h1>Le chauffeur envoie sa position, les passagers reçoivent des alertes WhatsApp.</h1>
+      <p class="lead">Cette version vise un modèle anonyme et rapide : pas de compte e-mail, juste un téléphone pour les abonnés et un mode chauffeur pour la localisation GPS.</p>
+      <p class="notice" id="setupNotice" role="status">L’app démarre en mode démonstration. Pour passer en production, configurez Firebase, Cloud Functions et l’API WhatsApp Business.</p>
     </section>
 
     <nav class="tabs" aria-label="Navigation principale">
-      <button class="tab active" type="button" data-tab="live">Trajets en direct</button>
-      <button class="tab" type="button" data-tab="driver">Espace chauffeur</button>
+      <button class="tab active" type="button" data-tab="live">Trajets actifs</button>
+      <button class="tab" type="button" data-tab="driver">Mode chauffeur</button>
+      <button class="tab" type="button" data-tab="passenger">Passager</button>
       <button class="tab" type="button" data-tab="about">À propos</button>
     </nav>
 
     <section class="panel active" id="panel-live" aria-labelledby="liveHeading">
-      <div class="section-heading"><div><p class="eyebrow">En temps réel</p><h2 id="liveHeading">Bus partagés</h2></div><button id="refreshButton" class="button secondary" type="button">Actualiser</button></div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Temps réel</p>
+          <h2 id="liveHeading">Trajets publiés</h2>
+        </div>
+        <button id="refreshButton" class="button secondary" type="button">Actualiser</button>
+      </div>
       <div id="liveTrips" class="trip-list" aria-live="polite"><div class="empty">Chargement des trajets…</div></div>
-      <p class="fine-print">La position n’est affichée que si un chauffeur connecté a démarré un trajet. Pas de bus actif = aucune donnée en direct.</p>
+      <p class="fine-print">Le chauffeur met à jour sa position pendant le trajet. Les passagers peuvent recevoir des alertes via WhatsApp, sans ouvrir l’application.</p>
     </section>
 
     <section class="panel" id="panel-driver" aria-labelledby="driverHeading" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Compte chauffeur</p><h2 id="driverHeading">Publier un trajet</h2></div></div>
-      <form id="loginForm" class="card form-card">
-        <p>La connexion chauffeur doit être créée dans Firebase Authentication. L’accès chauffeur doit aussi être autorisé dans Firestore (document <code>users/{uid}</code> avec <code>role: "driver"</code>).</p>
-        <label for="email">Adresse e-mail</label><input id="email" type="email" autocomplete="username" required>
-        <label for="password">Mot de passe</label><input id="password" type="password" autocomplete="current-password" required minlength="8">
-        <button class="button primary" type="submit">Se connecter</button>
-      </form>
-      <div id="driverControls" class="card form-card hidden">
-        <p class="signed-in">Connecté en tant que chauffeur autorisé.</p>
-        <label for="city">Ville</label><select id="city" required><option>Casablanca</option><option>Rabat</option><option>Tanger</option><option>Marrakech</option><option>Autre</option></select>
-        <label for="line">Ligne / destination</label><input id="line" type="text" maxlength="80" placeholder="Ex. Ligne A — Centre / Gare" required>
-        <div class="button-row"><button id="startTrip" class="button primary" type="button">Démarrer le GPS et publier</button><button id="stopTrip" class="button danger hidden" type="button">Terminer le trajet</button></div>
-        <p id="driverStatus" class="fine-print" role="status">Le GPS nécessite HTTPS et l’autorisation de localisation. Gardez cette page ouverte pendant la course.</p>
+      <div class="section-heading"><div><p class="eyebrow">Chauffeur</p><h2 id="driverHeading">Publier un trajet</h2></div></div>
+      <div class="card form-card">
+        <p>Le GPS est utilisé par le chauffeur uniquement. La position est envoyée vers Firebase, puis le backend peut notifier les passagers via WhatsApp.</p>
+        <label for="city">Ville</label>
+        <select id="city" required>
+          <option>Casablanca</option>
+          <option>Rabat</option>
+          <option>Tanger</option>
+          <option>Marrakech</option>
+          <option>Autre</option>
+        </select>
+
+        <label for="line">Ligne / destination</label>
+        <input id="line" type="text" maxlength="80" placeholder="Ex. Ligne A — Centre / Gare" required>
+
+        <div class="button-row">
+          <button id="startTrip" class="button primary" type="button">Démarrer le trajet</button>
+          <button id="stopTrip" class="button danger hidden" type="button">Terminer</button>
+        </div>
+
+        <p id="driverStatus" class="fine-print" role="status">Le GPS nécessite HTTPS ou localhost. Gardez la page ouverte pendant la course.</p>
       </div>
     </section>
 
+    <section class="panel" id="panel-passenger" aria-labelledby="passengerHeading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Passager</p><h2 id="passengerHeading">Abonnement WhatsApp</h2></div></div>
+      <form id="passengerForm" class="card form-card">
+        <p>Sans inscription : renseignez simplement votre numéro WhatsApp et la ligne de bus souhaitée. Le backend Firebase/Cloud Functions peut alors vous envoyer des alertes toutes les 2 minutes ou à l’approche.</p>
+        <label for="phoneNumber">Numéro WhatsApp</label>
+        <input id="phoneNumber" type="tel" inputmode="tel" placeholder="+212 6 12 34 56 78" required>
+
+        <label for="wantedLine">Ligne / arrêt visé</label>
+        <input id="wantedLine" type="text" maxlength="80" placeholder="Ex. Ligne A — Gare centrale" required>
+
+        <label for="stopName">Nom de l’arrêt</label>
+        <input id="stopName" type="text" maxlength="60" placeholder="Ex. Avenue Mohammed V" required>
+
+        <div class="button-row">
+          <button class="button primary" type="submit">Recevoir les alertes</button>
+          <button id="unsubscribePassenger" class="button secondary" type="button">Stop</button>
+        </div>
+      </form>
+      <div id="passengerSummary" class="card info-card hidden"></div>
+    </section>
+
     <section class="panel" id="panel-about" aria-labelledby="aboutHeading" hidden>
-      <div class="card about-card"><p class="eyebrow">État du produit</p><h2 id="aboutHeading">Prototype connecté, données à fournir</h2>
-        <p>TOBIS peut synchroniser les trajets avec Firebase après configuration. Les lignes, horaires, arrêts et positions réelles ne sont pas fournis par cette application et doivent être ajoutés par l’exploitant.</p>
-        <p>Le suivi GPS d’un navigateur n’est pas garanti en arrière-plan sur iOS ou Android. Pour un suivi professionnel continu, utilisez une application native/service de localisation et définissez les règles de consentement, de conservation et d’accès aux données.</p>
-        <p>Les coordonnées Firebase côté client identifient le projet, elles ne sont pas un secret. La sécurité dépend de Firebase Authentication, des règles Firestore et des restrictions API.</p>
+      <div class="card about-card">
+        <p class="eyebrow">Fonctionnement</p>
+        <h2 id="aboutHeading">Architecture rapide pour alertes WhatsApp</h2>
+        <p>Le chauffeur publie sa position en direct. Les passagers n’ont pas besoin d’un compte : ils mettent simplement leur numéro WhatsApp et la ligne souhaitée.</p>
+        <p>La vraie envoi WhatsApp automatique se fait côté backend via Firebase + Cloud Functions + WhatsApp Business. Le navigateur seul ne peut pas faire des messages WhatsApp sans serveur ni sécurisation.</p>
+        <p>Les alertes sont planifiées à intervalles réguliers (par exemple toutes les 2 minutes) et plus fréquentes à l’approche de l’arrêt. Cela dépend du calcul ETA, de l’itinéraire réel et de la règle de fréquence autorisée par WhatsApp.</p>
       </div>
     </section>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
-  <footer class="footer">TOBIS • Prototype — les données de démonstration ne représentent pas un service opérationnel.</footer>
+
+  <footer class="footer">TOBIS • Prototype anonyme pour transport urbain — ne pas déployer sans backend WhatsApp Business et règles Firestore.</footer>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
