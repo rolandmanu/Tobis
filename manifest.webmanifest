@@ -1,0 +1,15 @@
+{
+  "name": "TOBIS — Transport urbain",
+  "short_name": "TOBIS",
+  "description": "Application expérimentale de transport urbain au Maroc",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f7fb",
+  "theme_color": "#075ba8",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "./icons/tobis.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icons/tobis-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

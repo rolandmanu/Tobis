@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isDriver() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'driver';
+    }
+
+    // Public route catalogue: only trusted administrators should publish/edit routes.
+    match /routes/{routeId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Profile and role documents are provisioned by a trusted administrator, never by clients.
+    match /users/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Only drivers can create/update their own live location; anyone can read active public trips.
+    match /liveTrips/{tripId} {
+      allow read: if resource.data.status == 'active';
+      allow create: if isDriver()
+        && request.resource.data.driverUid == request.auth.uid
+        && request.resource.data.status == 'active'
+        && request.resource.data.city is string
+        && request.resource.data.line is string
+        && request.resource.data.line.size() > 0
+        && request.resource.data.line.size() <= 80
+        && request.resource.data.location == null;
+      allow update: if isDriver()
+        && resource.data.driverUid == request.auth.uid
+        && request.resource.data.driverUid == resource.data.driverUid
+        && request.resource.data.status in ['active', 'ended']
+        && request.resource.data.city == resource.data.city
+        && request.resource.data.line == resource.data.line;
+      allow delete: if false;
+    }
+  }
+}
