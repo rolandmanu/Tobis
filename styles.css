@@ -468,12 +468,12 @@ body{background:#edf3f7}
  .journey-live-message{margin-top:8px!important;padding:8px!important}
  .line-stops-heading{margin:3px 0 0!important}
  .route-progress-large{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 10px!important}
- .route-progress-large .stop-row{padding:3px 0!important;min-height:34px!important;gap:5px!important}
+ .route-progress-large .stop-row{padding:3px 0!important;min-height:39px!important;gap:5px!important}
  .route-progress-large .stop-track{width:11px!important}
  .route-progress-large .stop-detail{display:block!important;padding-bottom:2px!important}
  .route-progress-large .stop-detail strong{font-size:10px!important;line-height:1.2}
  .route-progress-large .stop-detail small{display:none!important}
- .route-progress-large .wait-stop-button{display:none!important}
+  .route-progress-large .wait-stop-button{display:inline-block!important;padding:4px 5px!important;font-size:8px!important;white-space:nowrap!important;margin-top:2px!important}
  .driver-session-settings{margin-top:0!important;padding:13px!important}
  .driver-session-settings .text-input{min-height:42px!important}
 }
