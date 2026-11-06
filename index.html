@@ -3,106 +3,123 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#075ba8">
-  <meta name="description" content="TOBIS — notifications WhatsApp sans inscription pour bus et lignes urbaines">
+  <meta name="theme-color" content="#082b46">
+  <meta name="description" content="TOBIS — votre bus, en temps réel.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/tobis.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
-  <title>TOBIS — Bus & WhatsApp</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <title>TOBIS — Le bus, simplement</title>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#home" aria-label="TOBIS accueil"><span class="brand-mark">T</span><span>TOBIS<small>Minuterie & alertes</small></span></a>
-    <div class="top-actions"><span id="connectionStatus" class="status" role="status">Initialisation…</span><button id="installButton" class="button secondary hidden" type="button">Installer</button></div>
-  </header>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" id="brandHome" aria-label="Accueil TOBIS">
+        <span class="brand-symbol"><span></span><span></span><span></span></span>
+        <span class="brand-name">tobis<span>.</span><small>Le bus, simplement.</small></span>
+      </a>
+      <div class="topbar-right">
+        <span id="networkBadge" class="network-badge"><i></i> Démo</span>
+        <button id="languageButton" class="icon-button" type="button" aria-label="Langue">FR</button>
+      </div>
+    </header>
 
-  <main class="container">
-    <section class="hero" id="home">
-      <p class="eyebrow">Transport urbain sans compte</p>
-      <h1>Le chauffeur envoie sa position, les passagers reçoivent des alertes WhatsApp.</h1>
-      <p class="lead">Cette version vise un modèle anonyme et rapide : pas de compte e-mail, juste un téléphone pour les abonnés et un mode chauffeur pour la localisation GPS.</p>
-      <p class="notice" id="setupNotice" role="status">L’app démarre en mode démonstration. Pour passer en production, configurez Firebase, Cloud Functions et l’API WhatsApp Business.</p>
-    </section>
+    <main id="appMain">
+      <section id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-copy">
+          <span class="eyebrow"><span class="eyebrow-dot"></span> MOBILITÉ EN TEMPS RÉEL</span>
+          <h1>Votre bus.<br><em>Au bon moment.</em></h1>
+          <p>Suivez votre ligne, repérez votre bus et gagnez du temps à chaque déplacement.</p>
+          <label class="field-label" for="welcomeCity">Votre ville</label>
+          <div class="select-wrap"><select id="welcomeCity"><option value="Tanger">Tanger</option><option value="Casablanca">Casablanca</option><option value="Rabat">Rabat</option><option value="Salé">Salé</option><option value="Marrakech">Marrakech</option><option value="Tétouan">Tétouan</option><option value="Autre">Autre ville</option></select><span>⌄</span></div>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <div class="sun-disc"></div><div class="route-orbit orbit-one"></div><div class="route-orbit orbit-two"></div>
+          <div class="bus-illustration"><div class="bus-destination">TOBIS · CITY LINE</div><div class="bus-windows"><i></i><i></i><i></i></div><div class="bus-front"><b></b></div><div class="bus-lights"><i></i><i></i></div><div class="bus-wheel wheel-a"></div><div class="bus-wheel wheel-b"></div></div>
+          <span class="art-pin pin-a">● <small>Centre-ville</small></span><span class="art-pin pin-b">● <small>Gare</small></span>
+        </div>
+        <div class="role-picker">
+          <button class="role-card passenger-role" type="button" data-role="passenger"><span class="role-icon">⌖</span><span><strong>Je suis passager</strong><small>Trouver mon bus et suivre ma ligne</small></span><b>→</b></button>
+          <button class="role-card driver-role" type="button" data-role="driver"><span class="role-icon">▣</span><span><strong>Je suis chauffeur</strong><small>Partager ma position avec les passagers</small></span><b>→</b></button>
+        </div>
+        <p class="welcome-foot">Simple · Gratuit pour commencer · Pensé pour le Maroc</p>
+      </section>
 
-    <nav class="tabs" aria-label="Navigation principale">
-      <button class="tab active" type="button" data-tab="live">Trajets actifs</button>
-      <button class="tab" type="button" data-tab="driver">Mode chauffeur</button>
-      <button class="tab" type="button" data-tab="passenger">Passager</button>
-      <button class="tab" type="button" data-tab="about">À propos</button>
+      <section id="workspace" class="workspace hidden">
+        <div class="workspace-heading">
+          <div><span class="eyebrow" id="roleEyebrow">ESPACE PASSAGER</span><h1 id="pageTitle">Bonjour 👋</h1><p id="pageSubtitle">Où souhaitez-vous aller aujourd’hui ?</p></div>
+          <button id="changeRole" class="text-button" type="button">Changer d’espace</button>
+        </div>
+
+        <section id="view-home" class="view active">
+          <div class="city-strip"><span class="city-icon">⌖</span><div><small>VILLE SÉLECTIONNÉE</small><strong id="currentCity">Tanger</strong></div><button id="changeCity" type="button">Modifier</button></div>
+          <div class="section-title"><div><span class="eyebrow">À PROXIMITÉ</span><h2>Vos lignes</h2></div><button class="subtle-button" data-go="lines" type="button">Tout voir <b>→</b></button></div>
+          <div id="homeLines" class="line-grid"></div>
+          <div class="tip-card"><span class="tip-icon">✦</span><div><strong>Un trajet plus serein</strong><p>Choisissez votre ligne pour voir les arrêts et la position du bus lorsqu’un chauffeur partage sa position.</p></div></div>
+          <div id="driverHomeCard" class="driver-home-card hidden"><div><span class="eyebrow">MODE CHAUFFEUR</span><h3>Prêt à partager votre trajet ?</h3><p>Activez le GPS pendant votre service pour informer les passagers.</p></div><button id="homeStartTrip" class="primary-button" type="button">Démarrer</button></div>
+        </section>
+
+        <section id="view-lines" class="view">
+          <div class="section-title"><div><span class="eyebrow">RÉSEAU URBAIN</span><h2>Choisir une ligne</h2></div></div>
+          <div class="filter-row"><label class="search-field"><span>⌕</span><input id="lineSearch" type="search" placeholder="Rechercher une ligne…"></label><select id="lineCity" aria-label="Ville"><option>Tanger</option><option>Casablanca</option><option>Rabat</option><option>Salé</option><option>Marrakech</option><option>Tétouan</option></select></div>
+          <div id="allLines" class="line-list"></div>
+          <div id="selectedLinePanel" class="selected-line-panel hidden"></div>
+        </section>
+
+        <section id="view-map" class="view">
+          <div class="section-title"><div><span class="eyebrow">CARTE EN DIRECT</span><h2>Autour de vous</h2></div><span class="live-label"><i></i> LIVE</span></div>
+          <div class="map-toolbar"><strong id="mapLineName">Toutes les lignes</strong><span id="mapStatus">Position en attente</span></div>
+          <div id="map"></div>
+          <div class="map-legend"><span><i class="legend-bus"></i> Bus partagé</span><span><i class="legend-stop"></i> Arrêt</span><small>La carte affiche les positions réellement partagées lorsqu’elles sont disponibles.</small></div>
+          <div id="mapBusCard" class="map-bus-card hidden"></div>
+        </section>
+
+        <section id="view-alerts" class="view">
+          <div class="section-title"><div><span class="eyebrow">RESTER INFORMÉ</span><h2>Mes alertes</h2></div></div>
+          <div class="settings-card">
+            <div class="setting-row"><div><strong>Me prévenir avant l’arrivée</strong><small>Choisissez le délai de notification</small></div><select id="alertMinutes"><option value="5">5 min</option><option value="10" selected>10 min</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option></select></div>
+            <div class="setting-row"><div><strong>Alerte de proximité</strong><small>Distance estimée du bus</small></div><select id="alertDistance"><option value="500">500 m</option><option value="1000" selected>1 km</option><option value="2000">2 km</option><option value="5000">5 km</option></select></div>
+            <div class="setting-row"><div><strong>Vibration</strong><small>Vibrer lors d’une alerte</small></div><label class="switch"><input id="vibrationToggle" type="checkbox" checked><span></span></label></div>
+            <div class="setting-row"><div><strong>Notifications du navigateur</strong><small>Recevoir les alertes lorsque le site le permet</small></div><button id="enableNotifications" class="outline-button" type="button">Activer</button></div>
+          </div>
+          <div class="notice-card"><span>ⓘ</span><p>Les alertes locales peuvent fonctionner sur cet appareil. Les notifications WhatsApp nécessitent un service serveur officiel et une configuration supplémentaire.</p></div>
+          <button id="saveAlerts" class="primary-button full-button" type="button">Enregistrer mes préférences</button>
+        </section>
+
+        <section id="view-settings" class="view">
+          <div class="section-title"><div><span class="eyebrow">VOTRE APPLICATION</span><h2>Paramètres</h2></div></div>
+          <div class="settings-card">
+            <div class="setting-row"><div><strong>Ville</strong><small>Votre réseau de transport</small></div><select id="settingsCity"><option>Tanger</option><option>Casablanca</option><option>Rabat</option><option>Salé</option><option>Marrakech</option><option>Tétouan</option><option>Autre</option></select></div>
+            <div class="setting-row"><div><strong>Langue</strong><small>Langue de l’application</small></div><select id="settingsLanguage"><option value="fr">Français</option><option value="ar">العربية</option><option value="en">English</option></select></div>
+            <div class="setting-row"><div><strong>Géolocalisation</strong><small>Autoriser l’accès à votre position</small></div><button id="locateMe" class="outline-button" type="button">Localiser</button></div>
+          </div>
+          <div id="driverSettings" class="settings-card hidden">
+            <div class="settings-card-title"><span class="eyebrow">INFORMATIONS CHAUFFEUR</span><h3>Mon véhicule et ma ligne</h3></div>
+            <label class="field-label" for="driverCompany">Société de transport</label><input class="text-input" id="driverCompany" placeholder="Nom de la société">
+            <label class="field-label" for="busNumber">Numéro du bus</label><input class="text-input" id="busNumber" placeholder="Ex. 24">
+            <label class="field-label" for="driverLine">Ligne</label><input class="text-input" id="driverLine" placeholder="Ex. L1">
+            <button id="saveDriverInfo" class="primary-button full-button" type="button">Enregistrer</button>
+          </div>
+          <button id="backWelcome" class="outline-button full-button" type="button">Retour à l’accueil</button>
+        </section>
+
+        <section id="view-driver" class="view hidden">
+          <div class="driver-status-card"><div class="driver-status-top"><span class="driver-status-dot"></span><span id="driverTripState">PAS DE TRAJET EN COURS</span></div><h2 id="driverTripTitle">Prêt pour votre service ?</h2><p id="driverTripDescription">Démarrez le partage GPS lorsque vous commencez votre trajet.</p><div class="driver-metrics"><div><small>GPS</small><strong id="gpsAccuracy">—</strong></div><div><small>Statut</small><strong id="gpsNetwork">En attente</strong></div><div><small>Bus</small><strong id="gpsBusNumber">—</strong></div></div><button id="driverStart" class="primary-button full-button" type="button">▶ &nbsp; Démarrer le partage GPS</button><button id="driverStop" class="stop-button full-button hidden" type="button">Terminer le trajet</button></div>
+          <div class="tip-card"><span class="tip-icon">⌖</span><div><strong>Conseil de sécurité</strong><p>Activez le partage uniquement pendant votre service. Gardez le téléphone dans un support adapté et ne le manipulez pas en conduisant.</p></div></div>
+        </section>
+      </section>
+    </main>
+
+    <nav id="bottomNav" class="bottom-nav hidden" aria-label="Navigation">
+      <button class="nav-item active" data-view="home" type="button"><span>⌂</span><small>Accueil</small></button>
+      <button class="nav-item" data-view="lines" type="button"><span>☷</span><small>Lignes</small></button>
+      <button class="nav-item map-nav" data-view="map" type="button"><span>⌖</span><small>Carte</small></button>
+      <button class="nav-item" data-view="alerts" type="button"><span>♧</span><small>Alertes</small></button>
+      <button class="nav-item" data-view="settings" type="button"><span>⚙</span><small>Réglages</small></button>
     </nav>
-
-    <section class="panel active" id="panel-live" aria-labelledby="liveHeading">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Temps réel</p>
-          <h2 id="liveHeading">Trajets publiés</h2>
-        </div>
-        <button id="refreshButton" class="button secondary" type="button">Actualiser</button>
-      </div>
-      <div id="liveTrips" class="trip-list" aria-live="polite"><div class="empty">Chargement des trajets…</div></div>
-      <p class="fine-print">Le chauffeur met à jour sa position pendant le trajet. Les passagers peuvent recevoir des alertes via WhatsApp, sans ouvrir l’application.</p>
-    </section>
-
-    <section class="panel" id="panel-driver" aria-labelledby="driverHeading" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Chauffeur</p><h2 id="driverHeading">Publier un trajet</h2></div></div>
-      <div class="card form-card">
-        <p>Le GPS est utilisé par le chauffeur uniquement. La position est envoyée vers Firebase, puis le backend peut notifier les passagers via WhatsApp.</p>
-        <label for="city">Ville</label>
-        <select id="city" required>
-          <option>Casablanca</option>
-          <option>Rabat</option>
-          <option>Tanger</option>
-          <option>Marrakech</option>
-          <option>Autre</option>
-        </select>
-
-        <label for="line">Ligne / destination</label>
-        <input id="line" type="text" maxlength="80" placeholder="Ex. Ligne A — Centre / Gare" required>
-
-        <div class="button-row">
-          <button id="startTrip" class="button primary" type="button">Démarrer le trajet</button>
-          <button id="stopTrip" class="button danger hidden" type="button">Terminer</button>
-        </div>
-
-        <p id="driverStatus" class="fine-print" role="status">Le GPS nécessite HTTPS ou localhost. Gardez la page ouverte pendant la course.</p>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-passenger" aria-labelledby="passengerHeading" hidden>
-      <div class="section-heading"><div><p class="eyebrow">Passager</p><h2 id="passengerHeading">Abonnement WhatsApp</h2></div></div>
-      <form id="passengerForm" class="card form-card">
-        <p>Sans inscription : renseignez simplement votre numéro WhatsApp et la ligne de bus souhaitée. Le backend Firebase/Cloud Functions peut alors vous envoyer des alertes toutes les 2 minutes ou à l’approche.</p>
-        <label for="phoneNumber">Numéro WhatsApp</label>
-        <input id="phoneNumber" type="tel" inputmode="tel" placeholder="+212 6 12 34 56 78" required>
-
-        <label for="wantedLine">Ligne / arrêt visé</label>
-        <input id="wantedLine" type="text" maxlength="80" placeholder="Ex. Ligne A — Gare centrale" required>
-
-        <label for="stopName">Nom de l’arrêt</label>
-        <input id="stopName" type="text" maxlength="60" placeholder="Ex. Avenue Mohammed V" required>
-
-        <div class="button-row">
-          <button class="button primary" type="submit">Recevoir les alertes</button>
-          <button id="unsubscribePassenger" class="button secondary" type="button">Stop</button>
-        </div>
-      </form>
-      <div id="passengerSummary" class="card info-card hidden"></div>
-    </section>
-
-    <section class="panel" id="panel-about" aria-labelledby="aboutHeading" hidden>
-      <div class="card about-card">
-        <p class="eyebrow">Fonctionnement</p>
-        <h2 id="aboutHeading">Architecture rapide pour alertes WhatsApp</h2>
-        <p>Le chauffeur publie sa position en direct. Les passagers n’ont pas besoin d’un compte : ils mettent simplement leur numéro WhatsApp et la ligne souhaitée.</p>
-        <p>La vraie envoi WhatsApp automatique se fait côté backend via Firebase + Cloud Functions + WhatsApp Business. Le navigateur seul ne peut pas faire des messages WhatsApp sans serveur ni sécurisation.</p>
-        <p>Les alertes sont planifiées à intervalles réguliers (par exemple toutes les 2 minutes) et plus fréquentes à l’approche de l’arrêt. Cela dépend du calcul ETA, de l’itinéraire réel et de la règle de fréquence autorisée par WhatsApp.</p>
-      </div>
-    </section>
-
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  </main>
-
-  <footer class="footer">TOBIS • Prototype anonyme pour transport urbain — ne pas déployer sans backend WhatsApp Business et règles Firestore.</footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
