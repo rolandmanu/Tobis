@@ -445,3 +445,35 @@ body{background:#edf3f7}
  .route-progress-large{grid-template-columns:1fr}
  .driver-session-settings{padding:15px}
 }
+
+
+/* Correctif affichage mobile : ouvrir chaque onglet en haut, sans zone vide */
+#workspace{min-height:calc(100dvh - 145px)}
+#view-driver.active{display:block;padding-top:0;margin-top:0}
+#view-driver.active>.driver-session-settings{display:block!important;margin:0 0 12px!important}
+#view-driver.active>.driver-status-card{margin:0 0 12px!important}
+#view-driver.active>.driver-waiting-card{margin:0 0 12px!important}
+#view-driver.active>.tip-card{margin-top:0}
+.workspace.line-focus-mode{padding-top:8px!important}
+.workspace.line-focus-mode #view-lines>.selected-line-panel{min-height:calc(100dvh - 150px)!important;justify-content:flex-start}
+.workspace.line-focus-mode #view-lines>.selected-line-panel.hidden{display:flex!important}
+@media(max-width:620px){
+ .workspace.line-focus-mode #view-lines>.selected-line-panel{padding:12px!important;gap:7px!important}
+ .line-focus-top h2{font-size:20px;margin:3px 0}
+ .line-focus-top p{font-size:10px}
+ .route-endpoints{margin:2px 0!important;padding:8px 10px!important}
+ .journey-progress-large{padding:12px!important;margin:2px 0!important}
+ .journey-progress-large .journey-progress-label{gap:4px!important}
+ .journey-progress-large .journey-progress-track{height:18px!important}
+ .journey-live-message{margin-top:8px!important;padding:8px!important}
+ .line-stops-heading{margin:3px 0 0!important}
+ .route-progress-large{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0 10px!important}
+ .route-progress-large .stop-row{padding:3px 0!important;min-height:34px!important;gap:5px!important}
+ .route-progress-large .stop-track{width:11px!important}
+ .route-progress-large .stop-detail{display:block!important;padding-bottom:2px!important}
+ .route-progress-large .stop-detail strong{font-size:10px!important;line-height:1.2}
+ .route-progress-large .stop-detail small{display:none!important}
+ .route-progress-large .wait-stop-button{display:none!important}
+ .driver-session-settings{margin-top:0!important;padding:13px!important}
+ .driver-session-settings .text-input{min-height:42px!important}
+}
