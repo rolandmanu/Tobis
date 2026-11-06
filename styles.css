@@ -7,3 +7,90 @@
 .range-setting{display:flex;align-items:center;gap:12px;min-width:min(54%,260px)}.range-setting input{width:100%;accent-color:#16866e}.range-setting strong{min-width:43px;text-align:right;font-size:11px;color:#167d68}
 
 #map:fullscreen{width:100vw;height:100vh;border-radius:0;z-index:9999}.map-toolbar .outline-button{padding:7px 10px;white-space:nowrap}
+
+
+/* TOBIS visual refresh — photographic, premium and mobile-first */
+:root{font-family:Inter,'DM Sans',sans-serif;color:#142c3b;background:#f4f6f7;--navy:#102c3d;--blue:#126b78;--mint:#c7efdf;--muted:#71818a;--line:#e7ecee}
+body{background:#f1f4f5}
+.app-shell{max-width:100%;background:#f7f8f8;padding-bottom:100px}
+.topbar{height:72px;padding:0 clamp(20px,5vw,76px);background:rgba(255,255,255,.94);box-shadow:0 4px 24px #102c3d08}
+.brand-symbol{width:40px;height:40px;border-radius:13px;background:#123b4b;box-shadow:0 6px 15px #123b4b25}
+.brand-symbol span{background:#b9e8d7}
+.brand-name{font-size:22px;letter-spacing:-1.2px}
+.network-badge{background:#f0f6f3;color:#51756a}
+.welcome-screen{max-width:1180px;padding:44px clamp(20px,6vw,82px) 34px}
+.welcome-copy{max-width:720px}
+.welcome-copy h1{font-size:clamp(42px,6vw,68px);letter-spacing:-3.2px;line-height:1.03;margin:18px 0 14px}
+.welcome-copy h1 em{color:#138477}
+.welcome-copy>p{font-size:15px;color:#6f7f87;max-width:510px}
+.welcome-art{height:clamp(230px,31vw,360px);margin:30px 0 20px;border-radius:25px;background-image:url('https://www.daimlertruck.com/fileadmin/press/6/6/D666065/cms.jpeg');background-size:cover;background-position:center 55%;box-shadow:0 18px 48px #132f3b20;isolation:isolate}
+.welcome-art-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,27,38,.82) 0%,rgba(8,27,38,.54) 42%,rgba(8,27,38,.04) 100%);border-radius:inherit;z-index:-0}
+.welcome-art-caption{position:absolute;left:clamp(22px,4vw,48px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;color:#fff;max-width:440px;z-index:1}
+.welcome-art-caption span{font-size:9px;font-weight:800;letter-spacing:2px;color:#c7ecdf}
+.welcome-art-caption strong{font:800 clamp(27px,4vw,45px)/1.08 Manrope,sans-serif;letter-spacing:-1.4px}
+.welcome-art-caption small{font-size:12px;color:#e0e9e9}
+.photo-credit{position:absolute;right:16px;bottom:14px;color:#fff9;font-size:8px;letter-spacing:1.2px;font-weight:700;z-index:1}
+.role-picker{gap:16px;margin-top:22px}
+.role-card{min-height:88px;padding:20px 22px;border:1px solid #e5ebed;border-radius:18px;box-shadow:0 7px 24px #17374408}
+.role-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px #17374412}
+.role-icon{width:48px;height:48px;border-radius:15px;background:#e8f5f0;color:#167b6d}
+.driver-role .role-icon{background:#edf2f5;color:#315d70}
+.role-card strong{font-size:14px}
+.role-card small{font-size:11px}
+.welcome-foot{font-size:10px;letter-spacing:.3px}
+.workspace{max-width:1180px;padding:32px clamp(16px,5vw,70px) 34px}
+.workspace-heading{margin-bottom:30px}
+.workspace-heading h1{font-size:30px;letter-spacing:-1px}
+.section-title{margin-bottom:17px}
+.section-title h2{font-size:24px;letter-spacing:-.8px}
+.city-strip,.line-card,.line-row,.selected-line-panel,.settings-card,.map-bus-card{border:1px solid #e7edef;box-shadow:0 8px 28px #1b3d4a08}
+.city-strip{border-radius:16px;padding:16px 18px;background:#fff}
+.line-grid{gap:14px}
+.line-card{border-radius:17px;padding:18px;min-height:125px}
+.line-card:hover,.line-card.selected{border-color:#8acdbb;box-shadow:0 12px 28px #1b625114}
+.line-code{background:#e8f4ef;color:#147b68;border-radius:9px}
+.tip-card{border-radius:17px;background:#edf4f2;padding:19px}
+.filter-row{margin:20px 0 15px}
+.search-field,.filter-row select{border-radius:13px}
+.line-row{border-radius:15px;padding:15px 16px}
+.selected-line-panel{border-radius:18px;padding:20px}
+.map-toolbar{border-radius:16px 16px 0 0;padding:15px 17px}
+#map{height:min(58vh,560px);min-height:350px}
+.map-bus-card{margin-top:12px;border-radius:15px}
+.settings-card{border-radius:17px;padding:5px 19px}
+.setting-row{padding:17px 0}
+.setting-row strong{font-size:13px}
+.setting-row small{font-size:11px}
+.primary-button{background:#123f50;border-radius:12px;padding:14px 20px;font-size:12px;box-shadow:0 7px 18px #123f5020}
+.primary-button:hover{background:#176273}
+.driver-status-card{border-radius:22px;background:linear-gradient(135deg,#102f40,#176071);box-shadow:0 15px 36px #0e354522;padding:26px}
+.bottom-nav{height:78px;width:min(100%,760px);bottom:14px;border:1px solid #e7edef;border-radius:22px;box-shadow:0 10px 40px #102d3d18;padding:7px 14px;background:rgba(255,255,255,.94)}
+.nav-item{min-width:64px;gap:5px}
+.nav-item span{font-size:22px}
+.nav-item small{font-size:10px}
+.nav-item.active{color:#138477}
+.nav-item.map-nav span{width:44px;height:44px;border-radius:15px;background:#123f50}
+.toast{bottom:108px}
+@media(max-width:600px){
+ .topbar{height:64px;padding:0 16px}
+ .welcome-screen{padding:26px 16px 20px}
+ .welcome-copy h1{font-size:43px;letter-spacing:-2.5px}
+ .welcome-copy>p{font-size:13px;line-height:1.6}
+ .welcome-art{height:225px;margin:22px 0 16px;border-radius:20px;background-position:58% center}
+ .welcome-art-shade{background:linear-gradient(90deg,rgba(8,27,38,.83),rgba(8,27,38,.48) 68%,rgba(8,27,38,.12))}
+ .welcome-art-caption{left:20px;max-width:75%;gap:10px}
+ .welcome-art-caption strong{font-size:30px}
+ .welcome-art-caption small{font-size:10px;line-height:1.5}
+ .role-picker{grid-template-columns:1fr;gap:10px;margin-top:16px}
+ .role-card{min-height:78px;padding:14px 16px}
+ .workspace{padding:22px 14px 26px}
+ .workspace-heading h1{font-size:25px}
+ .section-title h2{font-size:21px}
+ .line-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .line-card{min-height:112px;padding:14px}
+ #map{height:55vh;min-height:320px}
+ .bottom-nav{bottom:8px;width:calc(100% - 18px);height:68px;border-radius:19px}
+ .nav-item{min-width:48px}
+ .nav-item small{font-size:9px}
+ .nav-item.map-nav span{width:40px;height:40px;margin-top:-15px}
+}
