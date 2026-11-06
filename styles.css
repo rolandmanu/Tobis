@@ -332,3 +332,51 @@ body{background:#edf3f7}
 #welcomeScreen .role-picker{margin-top:18px;gap:14px}
 #welcomeScreen .role-card{min-height:84px}
 @media(max-width:620px){#welcomeScreen.welcome-screen{padding:12px 12px 22px}#welcomeScreen .welcome-art{height:clamp(260px,72vw,390px);margin-bottom:14px;border-radius:18px}.welcome-station-bar{min-height:62px;padding:10px 12px;gap:8px}.welcome-station-label{font-size:8px}.welcome-station-bar strong{font-size:12px}.welcome-live-state{font-size:8px}#welcomeScreen .role-picker{grid-template-columns:1fr;gap:10px}#welcomeScreen .role-card{min-height:72px;padding:14px}}
+
+
+/* Accueil — touche marocaine : zellige discret et titre au-dessus de la photo */
+#welcomeScreen.welcome-screen{
+  position:relative;
+  isolation:isolate;
+  background-color:#f1f6f8;
+  background-image:
+    repeating-linear-gradient(45deg,transparent 0 19px,rgba(8,94,126,.045) 19px 21px,transparent 21px 40px),
+    repeating-linear-gradient(-45deg,transparent 0 19px,rgba(8,94,126,.045) 19px 21px,transparent 21px 40px),
+    radial-gradient(circle at 20px 20px,rgba(218,164,72,.11) 0 2px,transparent 2.8px);
+  background-size:40px 40px,40px 40px,40px 40px;
+}
+#welcomeScreen .welcome-heading{
+  position:relative;
+  z-index:1;
+  margin:0 0 18px;
+  padding:0 2px 0 15px;
+  border-left:4px solid #d7a84c;
+}
+#welcomeScreen .welcome-heading-kicker{
+  display:block;
+  margin-bottom:5px;
+  color:#1680a5;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.8px;
+}
+#welcomeScreen .welcome-heading h1{
+  margin:0;
+  color:#123d58;
+  font:800 clamp(24px,4vw,36px)/1.12 Manrope,'DM Sans',sans-serif;
+  letter-spacing:-1.1px;
+}
+#welcomeScreen .welcome-art,
+#welcomeScreen .role-picker{position:relative;z-index:1}
+#welcomeScreen .welcome-art{
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 18px 42px rgba(16,55,75,.19),0 0 0 5px rgba(255,255,255,.45);
+}
+#welcomeScreen .role-card{
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);
+}
+@media(max-width:620px){
+  #welcomeScreen .welcome-heading{margin-bottom:14px;padding-left:12px}
+  #welcomeScreen .welcome-heading h1{font-size:26px}
+}
