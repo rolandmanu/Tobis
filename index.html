@@ -60,26 +60,29 @@
         <section id="view-lines" class="view">
           <div class="section-title"><div><span class="eyebrow">RÉSEAU URBAIN</span><h2>Choisir une ligne</h2></div></div>
           <div class="notice-card"><span>ⓘ</span><p>Les lignes affichées actuellement sont des exemples de démonstration. Elles ne constituent pas encore un référentiel officiel vérifié.</p></div><div class="filter-row"><label class="search-field"><span>⌕</span><input id="lineSearch" type="search" placeholder="Rechercher une ligne…"></label><select id="lineCity" aria-label="Ville"><option>Tanger</option><option>Casablanca</option><option>Rabat</option><option>Salé</option><option>Marrakech</option><option>Tétouan</option></select></div>
-          <div id="allLines" class="line-list"></div>
+          <label class="field-label line-picker-label" for="linePicker">Sélectionner une ligne</label><select id="linePicker" class="line-picker"><option value="">Choisir une ligne…</option></select><div id="allLines" class="line-list"></div>
           <div id="selectedLinePanel" class="selected-line-panel hidden"></div>
         </section>
 
         <section id="view-map" class="view">
           <div class="section-title"><div><span class="eyebrow">CARTE EN DIRECT</span><h2>Autour de vous</h2></div><span class="live-label"><i></i> LIVE</span></div>
           <div class="map-toolbar"><strong id="mapLineName">Toutes les lignes</strong><span id="mapStatus">Position en attente</span><button id="mapFullscreen" class="outline-button" type="button">Plein écran</button></div>
-          <div id="map"></div>
+          <div id="map"><button id="mapExitFullscreen" class="map-exit-button" type="button" aria-label="Quitter le plein écran" title="Quitter le plein écran">×</button></div>
           <div class="map-legend"><span><i class="legend-bus"></i> Bus partagé</span><span><i class="legend-stop"></i> Arrêt</span><small>La carte affiche les positions réellement partagées lorsqu’elles sont disponibles.</small></div>
           <div id="mapBusCard" class="map-bus-card hidden"></div>
         </section>
 
         <section id="view-alerts" class="view">
           <div class="section-title"><div><span class="eyebrow">RESTER INFORMÉ</span><h2>Mes alertes</h2></div></div>
+          <div class="settings-card alert-summary-card">
+            <div class="alert-bus-summary"><span class="alert-bus-icon">🚌</span><div><small>VOTRE SUIVI</small><strong id="alertBusLine">Ligne à sélectionner</strong><span id="alertBusNumber">Bus : en attente de partage</span></div><span class="alert-live-pill">SUIVI</span></div>
+          </div>
           <div class="settings-card">
-            <div class="setting-row"><div><strong>Me prévenir avant l’arrivée</strong><small>Choisissez le délai de notification</small></div><div class="range-setting"><input id="alertMinutes" type="range" min="1" max="30" step="1" value="10" aria-label="Délai avant arrivée"><strong><span id="alertMinutesValue">10</span> min</strong></div></div>
-            <div class="setting-row"><div><strong>Alerte de proximité</strong><small>Distance estimée du bus</small></div><select id="alertDistance"><option value="500">500 m</option><option value="1000" selected>1 km</option><option value="2000">2 km</option><option value="5000">5 km</option><option value="10000">10 km</option><option value="15000">15 km</option><option value="20000">20 km</option><option value="25000">25 km</option></select></div>
+            <div class="setting-row"><div><strong><span class="setting-symbol">⌚</span> Me prévenir avant l’arrivée</strong><small>Choisissez le délai de notification</small></div><small>Choisissez le délai de notification</small></div><div class="range-setting"><input id="alertMinutes" type="range" min="1" max="30" step="1" value="10" aria-label="Délai avant arrivée"><strong><span id="alertMinutesValue">10</span> min</strong></div></div>
+            <div class="setting-row"><div><strong><span class="setting-symbol">⌖</span> Alerte de proximité</strong><small>Distance estimée du bus</small></div><select id="alertDistance"><option value="500">500 m</option><option value="1000" selected>1 km</option><option value="2000">2 km</option><option value="5000">5 km</option><option value="10000">10 km</option><option value="15000">15 km</option><option value="20000">20 km</option><option value="25000">25 km</option></select></div>
             <div class="setting-row"><div><strong>Vibration</strong><small>Vibrer lors d’une alerte</small></div><label class="switch"><input id="vibrationToggle" type="checkbox" checked><span></span></label></div>
             <div class="setting-row"><div><strong>Son de notification</strong><small>Choisissez parmi 15 sonneries</small></div><select id="alertSound"><option value="1">1 · Douce</option><option value="2">2 · Clair</option><option value="3">3 · Digital</option><option value="4">4 · Radar</option><option value="5">5 · Cloche</option><option value="6">6 · Pulse</option><option value="7">7 · Horizon</option><option value="8">8 · Aqua</option><option value="9">9 · Focus</option><option value="10">10 · Signal</option><option value="11">11 · Étoile</option><option value="12">12 · Onde</option><option value="13">13 · Tempo</option><option value="14">14 · Écho</option><option value="15">15 · Classique</option></select></div>
-            <div class="setting-row"><div><strong>Volume</strong><small>Régler le niveau sonore</small></div><input id="alertVolume" type="range" min="0" max="100" value="70" aria-label="Volume de notification"></div>
+            <div class="setting-row volume-row"><div><strong>Volume</strong><small>Réglez le niveau sonore</small></div><div class="volume-control"><span class="speaker-level">🔈</span><input id="alertVolume" type="range" min="0" max="100" value="70" aria-label="Volume de notification"><span class="speaker-level">🔊</span><strong id="alertVolumeValue">70%</strong></div></div>
             <div class="setting-row"><div><strong>Importer un son</strong><small>Choisir un fichier audio sur le téléphone</small></div><input id="customAlertSound" type="file" accept="audio/*" aria-label="Importer un son"></div>
             <div class="setting-row"><div><strong>Écouter un aperçu</strong><small>Tester votre sonnerie</small></div><button id="previewAlertSound" class="outline-button" type="button">Écouter</button></div>
             <div class="setting-row"><div><strong>Notifications du navigateur</strong><small>Recevoir les alertes lorsque le site le permet</small></div><button id="enableNotifications" class="outline-button" type="button">Activer</button></div>
@@ -102,7 +105,7 @@
             <label class="field-label" for="driverLine">Ligne</label><input class="text-input" id="driverLine" placeholder="Ex. L1">
             <button id="saveDriverInfo" class="primary-button full-button" type="button">Enregistrer</button>
           </div>
-          <button id="backWelcome" class="outline-button full-button" type="button">Retour à l’accueil</button>
+          <div class="settings-card share-card"><div class="settings-card-title"><span class="eyebrow">FAITES CONNAÎTRE TOBIS</span><h3>Partager l’application</h3><p>Invitez vos proches à suivre leurs bus plus facilement.</p></div><div class="share-content"><img id="shareQr" alt="QR code pour ouvrir TOBIS" loading="lazy"><div><button id="shareApp" class="primary-button full-button" type="button">Partager TOBIS</button><button id="copyAppLink" class="outline-button full-button" type="button">Copier le lien</button><small id="shareLinkText">tobis-preview-roland.vercel.app</small></div></div></div><button id="backWelcome" class="outline-button full-button" type="button">Retour à l’accueil</button>
         </section>
 
         <section id="view-driver" class="view hidden">
