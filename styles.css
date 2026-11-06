@@ -238,3 +238,51 @@ body{background:#edf2f3}
 .share-content .full-button{margin-top:0;margin-bottom:9px}
 .share-content small{display:block;overflow-wrap:anywhere;text-align:center;color:#84949a;font-size:9px;margin-top:5px}
 @media(max-width:600px){.volume-control{min-width:52%;gap:6px}.volume-control strong{min-width:31px}.share-content{grid-template-columns:100px 1fr;gap:12px}.share-content img{width:100px;height:100px}}
+
+
+/* TOBIS — identité transport urbain */
+:root{--navy:#102f4d;--blue:#087fbd;--mint:#dff5ed;--coral:#f0644b;--green:#1b9b70;--yellow:#ffc247;--muted:#647b8b}
+body{background:#edf3f7}
+.app-shell{background:#f4f7fa}
+.brand-symbol{background:linear-gradient(145deg,#087fbd,#07527f);color:#fff;border-radius:12px;box-shadow:0 7px 18px #07527f35}
+.brand-symbol svg{width:29px;height:29px}
+.brand-name>span{color:var(--coral)}
+.network-badge{background:#e9f4fa;color:#17678f;font-weight:800}
+.welcome-screen{padding-top:42px}
+.welcome-copy h1{color:#102f4d}
+.welcome-copy h1 em{color:#e85e48}
+.welcome-copy>p{color:#607789}
+.welcome-art{height:clamp(250px,34vw,360px);margin:22px 0 18px;border-radius:25px;background-image:linear-gradient(90deg,rgba(6,32,53,.84) 0%,rgba(6,32,53,.54) 48%,rgba(6,32,53,.08) 100%),url('https://files.casatramway.ma/s3fs-public/images/1245.png?VersionId=0F3ANfI98QI6Ah3JguuYlV_UcskaNMky');background-position:center 54%;background-size:cover;justify-content:flex-start;align-items:flex-end;box-shadow:0 18px 36px #102f4d20}
+.welcome-art-shade{display:none}
+.welcome-art-caption{position:relative;z-index:2;padding:26px 30px 30px;color:#fff;max-width:490px}
+.welcome-art-caption span{font-size:10px;letter-spacing:2px;font-weight:900;color:#ffd16b}
+.welcome-art-caption strong{display:block;font:800 clamp(24px,4vw,36px)/1.08 Manrope,sans-serif;letter-spacing:-1px;margin:10px 0}
+.welcome-art-caption small{display:block;color:#e7f1f7;font-size:12px}
+.photo-credit{position:absolute;right:15px;bottom:12px;z-index:3;color:#fff;background:#102f4d99;padding:6px 9px;border-radius:7px;font-size:8px;letter-spacing:.6px}
+.role-picker{gap:14px;margin-top:20px}
+.role-card{border:1px solid #dce7ed;border-radius:17px;box-shadow:0 5px 18px #163c5410}
+.role-card:hover{border-color:#82c5dc;box-shadow:0 12px 25px #087fbd1b}
+.role-icon{background:#e5f4fb;color:#087fbd;border-radius:13px}
+.driver-role .role-icon{background:#fff0e9;color:#df634c}
+.role-icon svg{width:27px;height:27px}
+.role-card>b{color:var(--coral)}
+.welcome-foot{color:#78909f;font-weight:700;letter-spacing:.15px}
+.city-strip{border-left:4px solid var(--blue);box-shadow:0 5px 16px #102f4d08}
+.city-icon-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:12px;background:#e5f4fb;color:#087fbd;font-size:21px;flex:none}
+.line-card{border-radius:17px;box-shadow:0 4px 14px #102f4d08}
+.line-code{background:#e5f4fb;color:#087fbd;border:1px solid #cce8f4;font-size:13px}
+.line-card:nth-child(3n+2) .line-code{background:#fff0e9;color:#dc634c;border-color:#f8d9cf}
+.line-card:nth-child(3n) .line-code{background:#e5f6ee;color:#17885f;border-color:#cdebdc}
+.primary-button{background:linear-gradient(135deg,#087fbd,#075b91);box-shadow:0 8px 18px #087fbd2b}
+.live-label{color:#16885f}
+.live-label i{background:#20ad79;box-shadow:0 0 0 4px #20ad7920}
+.notice-card{border-left:4px solid var(--yellow)}
+@media(max-width:620px){
+ .welcome-screen{padding:30px 16px 22px}
+ .welcome-copy h1{font-size:clamp(40px,12vw,56px);letter-spacing:-2.4px}
+ .welcome-art{height:270px;margin-top:18px;background-position:57% center}
+ .welcome-art-caption{padding:19px}
+ .welcome-art-caption strong{font-size:27px}
+ .role-picker{grid-template-columns:1fr}
+ .role-card{padding:15px}
+}
