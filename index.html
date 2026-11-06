@@ -99,17 +99,17 @@
             <div class="setting-row"><div><strong>Langue</strong><small>Langue de l’application</small></div><select id="settingsLanguage"><option value="fr">Français</option><option value="ar">العربية</option><option value="en">English</option></select></div>
             <div class="setting-row"><div><strong>Géolocalisation</strong><small>Autoriser l’accès à votre position</small></div><button id="locateMe" class="outline-button" type="button">Localiser</button></div>
           </div>
-          <div id="driverSettings" class="settings-card hidden">
+          <div class="settings-card share-card"><div class="settings-card-title"><span class="eyebrow">FAITES CONNAÎTRE TOBIS</span><h3>Partager l’application</h3><p>Invitez vos proches à suivre leurs bus plus facilement.</p></div><div class="share-content"><img id="shareQr" alt="QR code pour ouvrir TOBIS" loading="lazy"><div><button id="shareApp" class="primary-button full-button" type="button">Partager TOBIS</button><button id="copyAppLink" class="outline-button full-button" type="button">Copier le lien</button><small id="shareLinkText">tobis-preview-roland.vercel.app</small></div></div></div><button id="backWelcome" class="outline-button full-button" type="button">Retour à l’accueil</button>
+        </section>
+
+        <section id="view-driver" class="view hidden">
+          <div id="driverSettings" class="settings-card driver-session-settings">
             <div class="settings-card-title"><span class="eyebrow">INFORMATIONS CHAUFFEUR</span><h3>Mon véhicule et ma ligne</h3></div>
             <label class="field-label" for="driverCompany">Société de transport</label><input class="text-input" id="driverCompany" placeholder="Nom de la société">
             <label class="field-label" for="busNumber">Numéro du bus</label><input class="text-input" id="busNumber" placeholder="Ex. 24">
             <label class="field-label" for="driverLine">Ligne</label><input class="text-input" id="driverLine" placeholder="Ex. L1">
             <button id="saveDriverInfo" class="primary-button full-button" type="button">Enregistrer</button>
           </div>
-          <div class="settings-card share-card"><div class="settings-card-title"><span class="eyebrow">FAITES CONNAÎTRE TOBIS</span><h3>Partager l’application</h3><p>Invitez vos proches à suivre leurs bus plus facilement.</p></div><div class="share-content"><img id="shareQr" alt="QR code pour ouvrir TOBIS" loading="lazy"><div><button id="shareApp" class="primary-button full-button" type="button">Partager TOBIS</button><button id="copyAppLink" class="outline-button full-button" type="button">Copier le lien</button><small id="shareLinkText">tobis-preview-roland.vercel.app</small></div></div></div><button id="backWelcome" class="outline-button full-button" type="button">Retour à l’accueil</button>
-        </section>
-
-        <section id="view-driver" class="view hidden">
           <div class="driver-status-card"><div class="driver-status-top"><span class="driver-status-dot"></span><span id="driverTripState">PAS DE TRAJET EN COURS</span></div><h2 id="driverTripTitle">Prêt pour votre service ?</h2><p id="driverTripDescription">Démarrez le partage GPS lorsque vous commencez votre trajet.</p><div class="driver-metrics"><div><small>GPS</small><strong id="gpsAccuracy">—</strong></div><div><small>Statut</small><strong id="gpsNetwork">En attente</strong></div><div><small>Bus</small><strong id="gpsBusNumber">—</strong></div></div><button id="driverStart" class="primary-button full-button" type="button">▶ &nbsp; Démarrer le partage GPS</button><button id="driverStop" class="stop-button full-button hidden" type="button">Terminer le trajet</button></div>
           <div class="settings-card driver-waiting-card"><div class="settings-card-title"><span class="eyebrow">DEMANDES PASSAGERS</span><h3>Passagers en attente par arrêt</h3></div><div id="driverWaitingPanel"><p class="waiting-empty">Les demandes apparaîtront ici lorsque la ligne sera enregistrée.</p></div><p class="waiting-note">Comptage indicatif basé sur les déclarations volontaires des passagers. Chaque demande expire après 30 minutes.</p></div>
           <div class="tip-card"><span class="tip-icon">⌖</span><div><strong>Conseil de sécurité</strong><p>Activez le partage uniquement pendant votre service. Gardez le téléphone dans un support adapté et ne le manipulez pas en conduisant.</p></div></div>
