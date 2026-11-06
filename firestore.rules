@@ -34,10 +34,24 @@ service cloud.firestore {
         && request.resource.data.status == 'active'
         && request.resource.data.city is string
         && request.resource.data.line is string
-        && request.resource.data.stop is string;
+        && request.resource.data.stop is string
+        && request.resource.data.stop.size() > 0
+        && request.resource.data.stop.size() <= 120
+        && request.resource.data.expiresAt is int
+        && request.resource.data.expiresAt > request.time.toMillis()
+        && request.resource.data.expiresAt <= request.time.toMillis() + 1800000;
       allow update: if signedIn()
         && resource.data.passengerUid == request.auth.uid
-        && request.resource.data.passengerUid == resource.data.passengerUid;
+        && request.resource.data.passengerUid == resource.data.passengerUid
+        && request.resource.data.city == resource.data.city
+        && request.resource.data.line == resource.data.line
+        && request.resource.data.status == 'active'
+        && request.resource.data.stop is string
+        && request.resource.data.stop.size() > 0
+        && request.resource.data.stop.size() <= 120
+        && request.resource.data.expiresAt is int
+        && request.resource.data.expiresAt > request.time.toMillis()
+        && request.resource.data.expiresAt <= request.time.toMillis() + 1800000;
       allow delete: if signedIn() && resource.data.passengerUid == request.auth.uid;
     }
   }
