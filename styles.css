@@ -395,3 +395,53 @@ body{background:#edf3f7}
  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112' viewBox='0 0 112 112'%3E%3Crect width='112' height='112' fill='%23f1f6f8'/%3E%3Cg fill='none' stroke='%230b6f8d' stroke-opacity='.10' stroke-width='1.15'%3E%3Cpath d='M56 8 68 32 92 20 80 44 104 56 80 68 92 92 68 80 56 104 44 80 20 92 32 68 8 56 32 44 20 20 44 32Z'/%3E%3Cpath d='M56 20 66 38 84 28 74 46 92 56 74 66 84 84 66 74 56 92 46 74 28 84 38 66 20 56 38 46 28 28 46 38Z'/%3E%3Cpath d='M0 0 14 28 42 14 28 42 56 56 28 70 42 98 14 84 0 112M112 0 98 28 70 14 84 42 56 56 84 70 70 98 98 84 112 112'/%3E%3C/g%3E%3Ccircle cx='56' cy='56' r='3' fill='%23c99b45' fill-opacity='.22'/%3E%3C/svg%3E");
  background-size:112px 112px;
 }
+
+
+/* Réglages de session chauffeur : immédiatement visibles en haut de l'écran */
+.driver-session-settings{display:block!important;margin:0 0 16px;padding:18px 20px;border:1px solid #dce8ed;border-radius:19px;background:#fff;box-shadow:0 8px 24px #102f4d0b}
+.driver-session-settings .settings-card-title{padding:0 0 8px}
+.driver-session-settings .field-label{margin-top:10px}
+.driver-session-settings .text-input{min-height:48px;margin-bottom:2px;font-size:14px}
+#view-driver{padding-top:0}
+#view-driver>.driver-status-card{margin-top:0}
+#view-settings #driverSettings{display:none!important}
+/* Après sélection : la page Ligne devient un écran de suivi dédié */
+.workspace.line-focus-mode{padding-top:12px;padding-bottom:86px}
+.workspace.line-focus-mode #view-lines>.section-title,
+.workspace.line-focus-mode #view-lines>.notice-card,
+.workspace.line-focus-mode #view-lines>.filter-row,
+.workspace.line-focus-mode #view-lines>.line-picker-label,
+.workspace.line-focus-mode #view-lines>#linePicker,
+.workspace.line-focus-mode #view-lines>#allLines{display:none!important}
+.workspace.line-focus-mode #view-lines>.selected-line-panel{display:flex!important;flex-direction:column;gap:12px;margin:0;padding:clamp(16px,3vw,30px);min-height:calc(100dvh - 170px);border:1px solid #dce8ed;border-radius:22px;background:linear-gradient(180deg,#fff 0%,#f7fbfd 100%);box-shadow:0 12px 32px #102f4d0c}
+.line-focus-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.line-focus-top h2{font:850 clamp(22px,4vw,30px)/1.15 Manrope,sans-serif;color:#103d58;margin:6px 0}
+.line-focus-top p{margin:0;color:#718494;font-size:12px}
+.change-line-button{flex:none;white-space:nowrap}
+.journey-progress-large{padding:clamp(18px,4vw,30px);margin:8px 0 4px;border-radius:20px;background:#f1f8fb;border-color:#d6e8ef}
+.journey-progress-large .journey-progress-label{align-items:flex-start;flex-direction:column;gap:8px}
+.journey-progress-large .journey-progress-label strong{font-size:clamp(17px,3vw,21px)}
+.journey-progress-large .journey-progress-label span{font-size:13px;text-align:left}
+.journey-progress-large .journey-progress-track{height:22px;border:4px solid #e1edf2;background:#dfe9ee}
+.journey-progress-large .journey-progress-track span{background:linear-gradient(90deg,#16a66f,#f0a33a,#df4c4c)}
+.journey-progress-large .journey-progress-ends{font-size:12px;font-weight:750;color:#49687a}
+.journey-live-message{display:flex;align-items:center;gap:12px;margin-top:18px;padding:14px;border-radius:14px;background:#fff;border:1px solid #e1ebef}
+.journey-live-message strong,.journey-live-message small{display:block}
+.journey-live-message strong{font-size:13px;color:#163f56}
+.journey-live-message small{font-size:11px;color:#718494;line-height:1.5;margin-top:4px}
+.line-stops-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:8px 0 0}
+.line-stops-heading strong{font-size:15px;color:#173e55}
+.line-stops-heading span{font-size:10px;color:#718494}
+.route-progress-large{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:4px 18px;margin-top:0}
+.route-progress-large .stop-row{min-width:0;padding:8px 0}
+.route-progress-large .stop-detail{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px 10px}
+.route-progress-large .stop-detail strong{font-size:13px}
+.route-progress-large .stop-detail small{grid-column:1}
+.route-progress-large .wait-stop-button{grid-column:2;grid-row:1/3;padding:8px 10px;font-size:10px}
+@media(max-width:620px){
+ .workspace.line-focus-mode{padding:8px 10px 88px}
+ .workspace.line-focus-mode #view-lines>.selected-line-panel{min-height:calc(100dvh - 154px);padding:15px;gap:10px}
+ .journey-progress-large .journey-progress-track{height:24px}
+ .route-progress-large{grid-template-columns:1fr}
+ .driver-session-settings{padding:15px}
+}
