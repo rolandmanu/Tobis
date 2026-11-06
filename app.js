@@ -31,7 +31,7 @@ function previewSound(){
   });
   setTimeout(()=>ctx.close(),pattern.length*200+300);
 }
-function updateAlertBusSummary(){const line=state.line;$('alertBusLine').textContent=line?line.code+' · '+line.name:'Ligne à sélectionner';const bus=state.latestTrip?.busNumber||$('busNumber')?.value?.trim();$('alertBusNumber').textContent=bus?'Bus n° '+bus:'Bus : en attente de partage'}
+function updateAlertBusSummary(){const line=state.line;const lineEl=$('alertBusLine'),busEl=$('alertBusNumber');if(lineEl)lineEl.textContent=line?line.code+' · '+line.name:'Ligne à sélectionner';const bus=state.latestTrip?.busNumber||$('busNumber')?.value?.trim();if(busEl)busEl.textContent=bus?'Bus n° '+bus:'Bus : en attente de partage'}
 function updateVolumeLabel(){const v=Number($('alertVolume').value||0);$('alertVolumeValue').textContent=v+'%'}
 function shareApp(){const url=location.href.split('#')[0];if(navigator.share){navigator.share({title:'TOBIS',text:'Suivez votre bus avec TOBIS.',url}).catch(()=>{})}else if(navigator.clipboard?.writeText){navigator.clipboard.writeText(url).then(()=>toast('Lien TOBIS copié.')).catch(()=>toast('Copiez le lien affiché sous le QR code.'))}else toast('Le partage natif n’est pas disponible sur cet appareil.')}
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(state.toastTimer);state.toastTimer=setTimeout(()=>el.classList.remove('show'),3000)}
