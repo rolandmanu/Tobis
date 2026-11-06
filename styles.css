@@ -477,3 +477,124 @@ body{background:#edf3f7}
  .driver-session-settings{margin-top:0!important;padding:13px!important}
  .driver-session-settings .text-input{min-height:42px!important}
 }
+
+
+/* CORRECTION DEMANDEE — suivi passager en pleine page, sans compactage */
+.workspace.line-focus-mode{
+  width:100%;
+  max-width:none;
+  min-height:calc(100dvh - 72px);
+  padding:12px clamp(12px,2.5vw,32px) 92px!important;
+}
+.workspace.line-focus-mode #view-lines{
+  width:100%;
+  min-height:calc(100dvh - 180px);
+}
+.workspace.line-focus-mode #view-lines>.selected-line-panel{
+  width:100%;
+  max-width:none;
+  min-height:calc(100dvh - 180px)!important;
+  height:auto;
+  padding:clamp(18px,3vw,34px)!important;
+  gap:clamp(14px,2.4vh,24px)!important;
+  justify-content:flex-start;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:#f4f8fb;
+}
+.workspace.line-focus-mode .line-focus-top h2{font-size:clamp(23px,3vw,32px);margin:8px 0}
+.workspace.line-focus-mode .line-focus-top p{font-size:13px}
+.workspace.line-focus-mode .route-endpoints{
+  width:100%;
+  min-height:86px;
+  margin:0!important;
+  padding:20px clamp(16px,3vw,30px)!important;
+}
+.workspace.line-focus-mode .route-endpoints strong{font-size:clamp(15px,2vw,19px)}
+.workspace.line-focus-mode .journey-progress-large{
+  width:100%;
+  margin:0!important;
+  padding:clamp(20px,4vw,36px)!important;
+  border-radius:22px;
+}
+.workspace.line-focus-mode .journey-progress-large .journey-progress-label{
+  flex-direction:row;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+.workspace.line-focus-mode .journey-progress-large .journey-progress-label strong{font-size:clamp(19px,2.6vw,26px)}
+.workspace.line-focus-mode .journey-progress-large .journey-progress-label span{font-size:clamp(13px,1.5vw,16px);text-align:right}
+.workspace.line-focus-mode .journey-progress-large .journey-progress-track{height:30px;border-width:5px}
+.workspace.line-focus-mode .journey-progress-large .journey-progress-ends{font-size:13px;margin-top:12px}
+.workspace.line-focus-mode .journey-live-message{margin-top:18px;padding:17px}
+.workspace.line-focus-mode .journey-live-message strong{font-size:15px}
+.workspace.line-focus-mode .journey-live-message small{font-size:12px}
+.workspace.line-focus-mode .line-stops-heading{margin:4px 0 0}
+.workspace.line-focus-mode .line-stops-heading strong{font-size:18px}
+.workspace.line-focus-mode .line-stops-heading span{font-size:12px}
+.workspace.line-focus-mode .route-progress-large{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:0;
+  margin:0;
+}
+.workspace.line-focus-mode .route-progress-large .stop-row{
+  min-height:54px;
+  padding:8px 4px!important;
+  gap:12px;
+  border-bottom:1px solid #dfe9ef;
+}
+.workspace.line-focus-mode .route-progress-large .stop-track{width:18px;flex:none}
+.workspace.line-focus-mode .route-progress-large .stop-detail{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:4px 14px;
+  padding:0;
+}
+.workspace.line-focus-mode .route-progress-large .stop-detail strong{font-size:14px;line-height:1.3}
+.workspace.line-focus-mode .route-progress-large .stop-detail small{display:block;font-size:11px}
+.workspace.line-focus-mode .route-progress-large .wait-stop-button{
+  display:inline-block;
+  grid-column:2;
+  grid-row:1/3;
+  padding:10px 15px!important;
+  font-size:11px!important;
+  white-space:nowrap;
+  margin:0!important;
+}
+@media(max-width:620px){
+  .workspace.line-focus-mode{padding:6px 0 88px!important}
+  .workspace.line-focus-mode #view-lines{min-height:calc(100dvh - 145px)}
+  .workspace.line-focus-mode #view-lines>.selected-line-panel{
+    min-height:calc(100dvh - 145px)!important;
+    padding:16px 14px 24px!important;
+    gap:13px!important;
+  }
+  .workspace.line-focus-mode .line-focus-top h2{font-size:23px}
+  .workspace.line-focus-mode .line-focus-top p{font-size:11px}
+  .workspace.line-focus-mode .change-line-button{padding:9px 11px}
+  .workspace.line-focus-mode .route-endpoints{min-height:78px;padding:14px 12px!important;gap:8px}
+  .workspace.line-focus-mode .route-endpoints small{font-size:9px}
+  .workspace.line-focus-mode .route-endpoints strong{font-size:13px}
+  .workspace.line-focus-mode .journey-progress-large{padding:18px 14px!important}
+  .workspace.line-focus-mode .journey-progress-large .journey-progress-label{
+    flex-direction:column;align-items:flex-start;gap:7px;margin-bottom:14px
+  }
+  .workspace.line-focus-mode .journey-progress-large .journey-progress-label strong{font-size:19px}
+  .workspace.line-focus-mode .journey-progress-large .journey-progress-label span{font-size:12px;text-align:left}
+  .workspace.line-focus-mode .journey-progress-large .journey-progress-track{height:26px}
+  .workspace.line-focus-mode .journey-progress-large .journey-progress-ends{font-size:11px}
+  .workspace.line-focus-mode .journey-live-message{margin-top:13px;padding:12px}
+  .workspace.line-focus-mode .journey-live-message strong{font-size:13px}
+  .workspace.line-focus-mode .journey-live-message small{font-size:10px}
+  .workspace.line-focus-mode .line-stops-heading strong{font-size:16px}
+  .workspace.line-focus-mode .route-progress-large .stop-row{min-height:55px;padding:8px 0!important}
+  .workspace.line-focus-mode .route-progress-large .stop-detail strong{font-size:13px}
+  .workspace.line-focus-mode .route-progress-large .stop-detail small{font-size:10px}
+  .workspace.line-focus-mode .route-progress-large .wait-stop-button{padding:9px 10px!important;font-size:10px!important}
+}
