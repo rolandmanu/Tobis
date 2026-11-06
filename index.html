@@ -44,12 +44,17 @@
 
       <section id="workspace" class="workspace hidden">
 
-        <section id="view-home" class="view active">
-          <div class="city-strip"><span class="city-icon">⌖</span><div><small>VILLE SÉLECTIONNÉE</small><strong id="currentCity">Tanger</strong></div>
-          <button id="changeCity" type="button">Modifier</button></div>
-          <div class="section-title"><div><span class="eyebrow">À PROXIMITÉ</span><h2>Vos lignes</h2></div><button class="subtle-button" data-go="lines" type="button">Tout voir <b>→</b></button></div>
-          <div id="homeLines" class="line-grid"></div>
-          <div class="tip-card"><span class="tip-icon">✦</span><div><strong>Un trajet plus serein</strong><p>Choisissez votre ligne pour voir les arrêts et la position du bus lorsqu’un chauffeur partage sa position.</p></div></div>
+        <section id="view-home" class="view active passenger-home">
+          <div class="section-title"><div><span class="eyebrow">VOTRE TRAJET</span><h2>Où allez-vous ?</h2></div></div>
+          <div class="passenger-select-card">
+            <label class="field-label" for="passengerCity">1 · Choisissez votre ville</label>
+            <select id="passengerCity" class="passenger-select"><option>Tanger</option><option>Casablanca</option><option>Rabat</option><option>Salé</option><option>Marrakech</option><option>Tétouan</option><option>Autre</option></select>
+            <label class="field-label" for="passengerLine">2 · Choisissez votre ligne</label>
+            <select id="passengerLine" class="passenger-select"><option value="">Choisir une ligne…</option></select>
+            <p class="passenger-select-hint">Les lignes proposées sont des exemples à confirmer avec le réseau de transport local.</p>
+          </div>
+          <div id="homeLines" class="line-grid hidden"></div>
+          <div class="tip-card"><span class="tip-icon">⌖</span><div><strong>Suivez votre bus</strong><p>Après le choix de la ligne, sélectionnez votre arrêt pour suivre l’approche du bus.</p></div></div>
           <div id="driverHomeCard" class="driver-home-card hidden"><div><span class="eyebrow">MODE CHAUFFEUR</span><h3>Prêt à partager votre trajet ?</h3><p>Activez le GPS pendant votre service pour informer les passagers.</p></div><button id="homeStartTrip" class="primary-button" type="button">Démarrer</button></div>
         </section>
 
