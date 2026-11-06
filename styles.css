@@ -681,3 +681,51 @@ body{background:#edf3f7}
   .workspace.line-focus-mode .timeline-connector{height:32px}
   .workspace.line-focus-mode .timeline-time{font-size:10px;padding:6px 9px}
 }
+
+
+/* Alertes : écran plus lisible, plein et coloré */
+#view-alerts{min-height:calc(100svh - 190px);padding-bottom:28px}
+#view-alerts>.section-title{margin-bottom:22px}
+#view-alerts>.section-title h2{font-size:clamp(27px,4vw,34px);color:#123b55}
+#view-alerts .settings-card{padding:8px 22px;margin-bottom:18px;border-radius:19px;box-shadow:0 8px 24px rgba(18,59,85,.055)}
+#view-alerts .setting-row{padding:21px 0;gap:18px}
+#view-alerts .setting-row strong{font-size:15px;color:#173f56}
+#view-alerts .setting-row small{font-size:12px;line-height:1.45;color:#718794}
+#view-alerts .setting-symbol{color:#168b80;margin-right:7px;font-size:19px}
+#view-alerts .setting-row select:not(.alert-distance-native){font-size:13px;min-height:42px;padding:10px 32px 10px 12px;border-radius:11px;background:#f5f9fb}
+#view-alerts .range-setting{min-width:min(58%,360px);gap:16px}
+#view-alerts .range-setting input,#view-alerts .volume-control input{height:8px;accent-color:#138c82}
+#view-alerts .range-setting strong{font-size:15px;color:#147d78;min-width:52px}
+#view-alerts .alert-distance-row{display:block;padding:22px 0}
+#view-alerts .alert-distance-heading{margin-bottom:17px}
+#view-alerts .alert-distance-native{position:absolute!important;width:1px;height:1px;opacity:0;pointer-events:none}
+#view-alerts .alert-distance-options{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;width:100%}
+#view-alerts .distance-chip{min-height:48px;border:1px solid transparent;border-radius:13px;font:800 13px 'DM Sans',sans-serif;cursor:pointer;transition:transform .15s,box-shadow .15s}
+#view-alerts .distance-chip:active{transform:scale(.97)}
+#view-alerts .distance-near{background:#e4f6ee;color:#16815f;border-color:#c6ead9}
+#view-alerts .distance-medium{background:#fff3dc;color:#a96a12;border-color:#f4dfb6}
+#view-alerts .distance-far{background:#ffebe7;color:#c45c48;border-color:#f4d0c8}
+#view-alerts .distance-chip.selected{outline:3px solid #173f5630;box-shadow:0 5px 13px rgba(20,62,82,.12);transform:translateY(-2px)}
+#view-alerts .switch{width:48px;height:27px}
+#view-alerts .switch span:before{width:21px;height:21px}
+#view-alerts .switch input:checked+span:before{transform:translateX(21px)}
+#view-alerts .outline-button{font-size:12px;padding:11px 15px}
+#view-alerts .notice-card{padding:16px;border-radius:14px;font-size:13px}
+#view-alerts .notice-card p{font-size:12px}
+#view-alerts #saveAlerts{min-height:54px;font-size:15px;background:linear-gradient(100deg,#0c6e83,#168c78);box-shadow:0 9px 20px #137f7728}
+#view-alerts .volume-control{display:flex;align-items:center;gap:9px;min-width:55%;max-width:360px}
+#view-alerts .volume-control input{flex:1;min-width:50px}
+#view-alerts .volume-control strong{font-size:13px;min-width:42px}
+@media(max-width:620px){
+ #view-alerts{min-height:calc(100svh - 150px);padding-bottom:34px}
+ #view-alerts>.section-title h2{font-size:28px}
+ #view-alerts .settings-card{padding:7px 16px;margin-bottom:15px}
+ #view-alerts .setting-row{padding:18px 0;gap:10px}
+ #view-alerts .setting-row strong{font-size:14px}
+ #view-alerts .setting-row small{font-size:11px}
+ #view-alerts .range-setting{min-width:52%;gap:9px}
+ #view-alerts .range-setting strong{font-size:14px}
+ #view-alerts .alert-distance-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ #view-alerts .distance-chip{min-height:47px;font-size:13px}
+ #view-alerts .volume-control{min-width:52%;gap:6px}
+}
