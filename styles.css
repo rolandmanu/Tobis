@@ -3,3 +3,5 @@
 .stop-detail{flex:1;min-width:0;padding-bottom:13px}.wait-stop-button{display:inline-block;margin-top:8px}.wait-stop-button:disabled{opacity:.72;cursor:default}.wait-stop-button.request-sent{border-color:#b9e4d3;background:#eef9f3;color:#187a5b}
 
 .driver-waiting-card{padding:8px 16px 14px}.waiting-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #edf1f3;font-size:11px;color:#29485a}.waiting-row:last-child{border-bottom:0}.waiting-row strong{color:#168565;font-size:13px}.waiting-row strong small{font-size:9px;font-weight:600;color:#82939d}.waiting-empty,.waiting-note{font-size:10px;line-height:1.55;color:#82939d}.waiting-note{margin:10px 0 0;padding-top:9px;border-top:1px solid #edf1f3}
+
+.range-setting{display:flex;align-items:center;gap:12px;min-width:min(54%,260px)}.range-setting input{width:100%;accent-color:#16866e}.range-setting strong{min-width:43px;text-align:right;font-size:11px;color:#167d68}
