@@ -316,3 +316,19 @@ body{background:#edf3f7}
 .home-live-info small{color:#16845f;font-size:10px;font-weight:750}
 .home-preview-action{margin-top:5px}
 @media(max-width:620px){.home-live-preview{grid-template-columns:1fr}.home-live-photo,.home-live-photo img{min-height:190px;height:190px}.home-live-info{padding:16px}.home-live-info>strong{font-size:15px}}
+
+/* Accueil simplifié : photo large, station et voyant GPS uniquement */
+#welcomeScreen.welcome-screen{max-width:100%;width:100%;padding:20px clamp(14px,4vw,42px) 28px}
+#welcomeScreen .welcome-art{height:clamp(310px,52vw,520px);width:100%;margin:0 0 18px;border-radius:22px;background-image:linear-gradient(0deg,rgba(5,24,38,.78) 0%,rgba(5,24,38,0) 42%),url('https://files.casatramway.ma/s3fs-public/images/1245.png?VersionId=0F3ANfI98QI6Ah3JguuYlV_UcskaNMky');background-size:cover;background-position:center 54%;position:relative;overflow:hidden;box-shadow:0 16px 38px #102f4d20}
+#welcomeScreen .welcome-art-shade,#welcomeScreen .welcome-art-caption,#welcomeScreen .photo-credit{display:none!important}
+.welcome-station-bar{position:absolute;left:0;right:0;bottom:0;min-height:66px;padding:12px 18px;display:flex;align-items:center;gap:12px;background:rgba(5,24,38,.78);backdrop-filter:blur(8px);color:#fff}
+.welcome-station-label{font-size:9px;font-weight:850;letter-spacing:1px;color:#b7cad5;white-space:nowrap}
+.welcome-station-bar strong{font-size:14px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.welcome-live-state{font-size:9px;font-weight:900;letter-spacing:.8px;color:#c3d0d7;white-space:nowrap}
+.welcome-live-state.is-live{color:#72f0b5}
+.welcome-live-dot{position:absolute;top:16px;right:16px;width:15px;height:15px;border-radius:50%;background:#9baab1;border:3px solid #fff;box-shadow:0 2px 8px #071d2c55;z-index:4}
+.welcome-live-dot.is-live{background:#20d889;animation:tobisLampPulse 1.35s infinite}
+@keyframes tobisLampPulse{0%,100%{box-shadow:0 0 0 3px #20d88935,0 2px 8px #071d2c55}50%{box-shadow:0 0 0 10px #20d88908,0 2px 8px #071d2c55}}
+#welcomeScreen .role-picker{margin-top:18px;gap:14px}
+#welcomeScreen .role-card{min-height:84px}
+@media(max-width:620px){#welcomeScreen.welcome-screen{padding:12px 12px 22px}#welcomeScreen .welcome-art{height:clamp(260px,72vw,390px);margin-bottom:14px;border-radius:18px}.welcome-station-bar{min-height:62px;padding:10px 12px;gap:8px}.welcome-station-label{font-size:8px}.welcome-station-bar strong{font-size:12px}.welcome-live-state{font-size:8px}#welcomeScreen .role-picker{grid-template-columns:1fr;gap:10px}#welcomeScreen .role-card{min-height:72px;padding:14px}}
