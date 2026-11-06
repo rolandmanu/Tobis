@@ -94,3 +94,117 @@ body{background:#f1f4f5}
  .nav-item small{font-size:9px}
  .nav-item.map-nav span{width:40px;height:40px;margin-top:-15px}
 }
+
+
+/* TOBIS — premium layout pass */
+:root{
+  --navy:#102f43;--blue:#147d88;--mint:#bfe9d9;--muted:#71828c;--line:#e5ecee;
+  color:#173447;background:#f3f6f6;
+}
+body{background:#edf2f3}
+.app-shell{max-width:100%;background:linear-gradient(180deg,#f8faf9 0%,#f1f5f5 100%)}
+.topbar{height:74px;padding:0 clamp(20px,6vw,90px);border:0;border-bottom:1px solid #e9eff0;background:rgba(255,255,255,.92);backdrop-filter:blur(18px)}
+.brand-symbol{border-radius:14px;background:linear-gradient(145deg,#12384b,#17677a);box-shadow:0 8px 20px #12384b25}
+.brand-name{font-size:23px}
+.network-badge{padding:9px 13px;border:1px solid #e7efec;background:#f5faf7}
+.icon-button{width:40px;height:40px}
+.welcome-screen{
+  max-width:1240px;min-height:calc(100vh - 74px);padding:clamp(32px,5vw,68px) clamp(20px,6vw,76px) 34px;
+  display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);grid-template-rows:auto auto auto;
+  column-gap:clamp(28px,5vw,68px);align-content:center;align-items:center
+}
+.welcome-copy{grid-column:1;grid-row:1;max-width:520px}
+.welcome-copy .eyebrow{display:inline-flex;align-items:center;padding:9px 12px;border:1px solid #dcece6;border-radius:30px;background:#f0f8f4;color:#39776b;font-size:9px;letter-spacing:1.35px}
+.welcome-copy h1{font-size:clamp(42px,5vw,66px);line-height:1.04;letter-spacing:-3.3px;margin:22px 0 16px;color:#102f43}
+.welcome-copy h1 em{color:#178b83}
+.welcome-copy>p{font-size:15px;line-height:1.8;color:#71818a;max-width:430px;margin-bottom:26px}
+.field-label{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:#617986}
+.select-wrap select{height:50px;border-radius:14px;border-color:#e0e9e9;box-shadow:0 5px 18px #1a3c4a08;font-size:13px}
+.welcome-art{
+  grid-column:2;grid-row:1 / span 2;height:clamp(330px,38vw,490px);margin:0;align-self:stretch;
+  border-radius:30px;background-position:center;background-size:cover;box-shadow:0 24px 65px #173b4a22;
+}
+.welcome-art-shade{background:linear-gradient(0deg,rgba(7,30,43,.82) 0%,rgba(7,30,43,.15) 68%,rgba(7,30,43,.02) 100%)}
+.welcome-art-caption{left:clamp(22px,3vw,42px);right:26px;top:auto;bottom:34px;transform:none;max-width:420px;gap:11px}
+.welcome-art-caption span{font-size:9px;letter-spacing:2px;color:#c6f1df}
+.welcome-art-caption strong{font-size:clamp(28px,3vw,42px);line-height:1.08;letter-spacing:-1.5px}
+.welcome-art-caption small{font-size:12px;line-height:1.6;color:#e4eeee}
+.photo-credit{font-size:8px}
+.role-picker{grid-column:1 / -1;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:28px;max-width:760px}
+.role-card{min-height:88px;padding:18px 20px;border:1px solid #e4ebeb;border-radius:18px;background:rgba(255,255,255,.92);box-shadow:0 9px 28px #173b4a0a}
+.role-card:hover{border-color:#9bd3c2;box-shadow:0 16px 34px #173b4a12}
+.role-icon{width:47px;height:47px;border-radius:15px;background:#e8f6f0;color:#14836f}
+.driver-role .role-icon{background:#edf3f7;color:#315f78}
+.role-card strong{font-size:13px;letter-spacing:-.1px}
+.role-card small{font-size:10px;line-height:1.45}
+.welcome-foot{grid-column:1 / -1;grid-row:3;text-align:left;margin:22px 0 0;color:#91a0a5;font-size:10px;letter-spacing:.35px}
+.workspace{max-width:1240px;padding:34px clamp(18px,6vw,76px) 38px}
+.workspace-heading{margin-bottom:32px}
+.workspace-heading h1{font-size:32px;letter-spacing:-1.2px}
+.workspace-heading p{font-size:13px}
+.city-strip{padding:17px 19px;border-radius:18px;box-shadow:0 8px 28px #193b4908}
+.city-icon{border-radius:14px;background:#e8f5f0;color:#168572}
+.section-title{margin-bottom:18px}
+.section-title h2{font-size:25px;letter-spacing:-.9px}
+.line-grid{gap:15px}
+.line-card{min-height:136px;padding:19px;border-radius:18px;box-shadow:0 8px 26px #193b4908}
+.line-card strong{font-size:13px;line-height:1.4}
+.line-card small{font-size:10px}
+.line-code{height:34px;border-radius:10px;background:#e8f5ef;color:#167b68}
+.tip-card{padding:19px 20px;border:1px solid #e4eeea;background:#edf6f2;border-radius:18px}
+.tip-card p{font-size:11px;line-height:1.7}
+.primary-button{border-radius:13px;background:linear-gradient(135deg,#123f52,#176c78);box-shadow:0 9px 20px #123f5222}
+.primary-button:hover{background:linear-gradient(135deg,#17566b,#16887f)}
+.filter-row{margin:22px 0 16px}
+.search-field,.filter-row select{min-height:48px;border-radius:14px;box-shadow:0 5px 18px #173b4a07}
+.line-row{padding:16px;border-radius:16px;box-shadow:0 6px 22px #173b4a07}
+.selected-line-panel,.settings-card{border-radius:19px;box-shadow:0 9px 28px #173b4a08}
+.selected-line-panel{padding:22px}
+.map-toolbar{padding:15px 18px;border-radius:17px 17px 0 0}
+#map{height:min(62vh,620px);min-height:380px;border-radius:0 0 17px 17px}
+.map-bus-card{padding:17px;border-radius:16px;box-shadow:0 8px 24px #173b4a0b}
+.settings-card{padding:6px 20px}
+.setting-row{padding:18px 0}
+.setting-row strong{font-size:12px}
+.setting-row small{font-size:10px}
+.driver-status-card{padding:28px;border-radius:24px;background:linear-gradient(135deg,#102f43 0%,#176879 100%);box-shadow:0 18px 42px #123c4d22}
+.driver-status-card h2{font-size:25px}
+.bottom-nav{height:76px;width:min(100% - 36px,720px);bottom:16px;border:1px solid #e4ebeb;border-radius:23px;background:rgba(255,255,255,.94);box-shadow:0 14px 44px #102f431c}
+.nav-item{min-width:66px}
+.nav-item.active{color:#138779}
+.nav-item.map-nav span{background:linear-gradient(145deg,#123f52,#168477);box-shadow:0 8px 20px #126e702e}
+.toast{bottom:108px}
+@media(max-width:760px){
+ .welcome-screen{min-height:auto;padding:27px 16px 26px;display:flex;flex-direction:column;align-items:stretch;gap:0}
+ .welcome-copy{max-width:none}
+ .welcome-copy .eyebrow{font-size:8px}
+ .welcome-copy h1{font-size:clamp(39px,11vw,52px);letter-spacing:-2.6px;margin:17px 0 12px}
+ .welcome-copy>p{font-size:13px;line-height:1.65;margin-bottom:19px}
+ .select-wrap{width:100%;max-width:none}
+ .welcome-art{height:230px;min-height:230px;margin:22px 0 0;border-radius:21px;background-position:center}
+ .welcome-art-caption{left:20px;right:18px;bottom:22px;max-width:310px;gap:8px}
+ .welcome-art-caption strong{font-size:29px}
+ .welcome-art-caption small{font-size:10px}
+ .role-picker{width:100%;grid-template-columns:1fr;gap:10px;margin-top:15px}
+ .role-card{min-height:76px;padding:13px 15px;border-radius:16px}
+ .welcome-foot{margin:17px 0 0;text-align:center;font-size:9px}
+ .workspace{padding:22px 14px 30px}
+ .workspace-heading{margin-bottom:23px}
+ .workspace-heading h1{font-size:26px}
+ .section-title h2{font-size:21px}
+ .line-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .line-card{min-height:112px;padding:13px;border-radius:15px}
+ #map{height:55vh;min-height:320px}
+ .bottom-nav{width:calc(100% - 18px);height:68px;bottom:8px;border-radius:19px}
+ .nav-item{min-width:48px}
+ .nav-item small{font-size:9px}
+ .nav-item.map-nav span{width:40px;height:40px;margin-top:-15px}
+ .setting-row{gap:10px}
+ .setting-row>div:first-child{max-width:58%}
+ .setting-row select{max-width:46%}
+}
+@media(min-width:761px) and (max-width:980px){
+ .welcome-screen{column-gap:28px;padding-left:30px;padding-right:30px}
+ .welcome-copy h1{font-size:48px}
+ .welcome-art{height:360px}
+}
