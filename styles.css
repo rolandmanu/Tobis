@@ -208,3 +208,33 @@ body{background:#edf2f3}
  .welcome-copy h1{font-size:48px}
  .welcome-art{height:360px}
 }
+
+
+/* Final usability refinements */
+.line-picker-label{margin:18px 0 8px}
+.line-picker{display:block;width:100%;min-height:54px;padding:0 16px;border:1px solid #dce8e8;border-radius:15px;background:#fff;color:#14394b;font:700 14px 'DM Sans',sans-serif;box-shadow:0 7px 22px #173b4a0a}
+.line-list{display:none}
+#map{position:relative}
+.map-exit-button{display:none}
+#map:fullscreen .map-exit-button{display:grid;place-items:center;position:fixed;z-index:2147483647;top:max(14px,env(safe-area-inset-top));right:14px;width:48px;height:48px;border:2px solid #fff;border-radius:50%;background:#123f52;color:#fff;font:400 34px/1 Arial,sans-serif;box-shadow:0 5px 22px #071c2c66;cursor:pointer}
+.alert-summary-card{padding:0 18px}
+.alert-bus-summary{display:flex;align-items:center;gap:13px;min-height:82px}
+.alert-bus-icon{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#e9f5f0;font-size:23px}
+.alert-bus-summary>div{flex:1;min-width:0}
+.alert-bus-summary small,.alert-bus-summary strong,.alert-bus-summary span{display:block}
+.alert-bus-summary small{font-size:9px;font-weight:800;letter-spacing:1px;color:#82959b}
+.alert-bus-summary strong{font-size:14px;color:#12384b;margin:4px 0}
+.alert-bus-summary span{font-size:10px;color:#788c94}
+.alert-live-pill{padding:7px 10px;border-radius:20px;background:#edf8f2;color:#17836c!important;font-size:9px!important;font-weight:800;letter-spacing:.8px}
+.setting-symbol{display:inline-grid;place-items:center;width:22px;height:22px;margin-right:5px;border-radius:7px;background:#edf6f2;color:#167e6e;font-size:14px}
+.volume-control{display:flex;align-items:center;gap:9px;min-width:min(58%,300px)}
+.volume-control input{flex:1;min-width:70px;accent-color:#168477}
+.speaker-level{font-size:17px;line-height:1}
+.volume-control strong{min-width:35px;text-align:right;color:#147e70;font-size:11px}
+.share-card{padding:6px 19px 18px}
+.share-card .settings-card-title p{font-size:11px;line-height:1.6;color:#7b8e96;margin:5px 0 10px}
+.share-content{display:grid;grid-template-columns:116px 1fr;gap:17px;align-items:center}
+.share-content img{width:116px;height:116px;object-fit:contain;padding:7px;border:1px solid #e5eeee;border-radius:13px;background:#fff}
+.share-content .full-button{margin-top:0;margin-bottom:9px}
+.share-content small{display:block;overflow-wrap:anywhere;text-align:center;color:#84949a;font-size:9px;margin-top:5px}
+@media(max-width:600px){.volume-control{min-width:52%;gap:6px}.volume-control strong{min-width:31px}.share-content{grid-template-columns:100px 1fr;gap:12px}.share-content img{width:100px;height:100px}}
